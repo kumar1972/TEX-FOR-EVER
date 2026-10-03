@@ -1,1 +1,66 @@
+name: Build Windows Setup
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set Version
+        shell: pwsh
+        run: |
+          $package = Get-Content package.json -Raw | ConvertFrom-Json
+
+          # Start from 1.0.1 and automatically increase the patch version
+          $runNumber = [int]${{ github.run_number }}
+          $patchVersion = $runNumber
+
+          if ($patchVersion -lt 1) {
+              $patchVersion = 1
+          }
+
+          $package.version = "1.0.$patchVersion"
+
+          $package | ConvertTo-Json -Depth 100 | Set-Content package.json -Encoding UTF8
+
+          Write-Host "Windows version set to $($package.version)"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Electron & Builder
+        run: |
+          npm install electron@^38.0.0 electron-builder@^26.0.0
+
+      - name: Build Windows Installer
+        run: |
+          npx electron-builder --win dir nsis --publish never
+
+      - name: List Build Output
+        shell: pwsh
+        run: |
+          Write-Host "===== WINDOWS BUILD OUTPUT ====="
+          Get-ChildItem -Path dist -Recurse
+          Write-Host "================================"
+
+      - name: Upload Windows Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: TEXFOREVER-Windows-Build
+          path: |
+            dist/*.exe
+            dist/win-unpacked/**
+          if-no-files-found: error
 
