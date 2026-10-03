@@ -1,0 +1,192 @@
+:root {
+    --bg-color: #0B192C;
+    --container-bg: #1E3E62;
+    --accent-color: #38BDF8;
+    --text-color: #F8FAFC;
+    --input-bg: #0B192C;
+    --input-focus-bg: #14293A;
+    --btn-bg: #0284C7;
+    --btn-hover: #0369A1;
+}
+
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+    font-family: 'Poppins', sans-serif; 
+}
+
+body { 
+    background-color: var(--bg-color); 
+    min-height: 100vh; 
+    padding: 6px; 
+    color: var(--text-color); 
+}
+
+.container {
+    background: var(--container-bg);
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 10px 8px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.form-group {
+    margin-bottom: 5px;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    color: var(--accent-color);
+    font-size: 9px;
+    margin-bottom: 1px;
+}
+
+input, select {
+    width: 100%;
+    padding: 5px 7px;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 5px;
+    font-size: 11px;
+    background: var(--input-bg);
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+input:focus, select:focus {
+    border-color: var(--accent-color);
+    outline: none;
+    background: var(--input-focus-bg);
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25);
+}
+
+.form-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 5px;
+}
+
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.btn-main {
+    width: 100%;
+    padding: 8px;
+    margin: 8px 0 4px 0;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    background: var(--btn-bg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.btn-main:hover { 
+    background: var(--btn-hover); 
+}
+
+.card-header {
+    font-size: 13px;
+    padding-bottom: 3px;
+    margin-bottom: 8px;
+    font-weight: 700;
+    border-bottom: 2px solid rgba(56, 189, 248, 0.4);
+    color: var(--accent-color);
+}
+
+.excel-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 5px;
+    font-size: 10px;
+}
+
+.excel-table th, .excel-table td {
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    padding: 4px 5px;
+    text-align: left;
+    color: var(--text-color);
+}
+
+.excel-table th {
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent-color);
+}
+
+.action-del {
+    background: #EF4444;
+    color: white;
+    border: none;
+    padding: 2px 5px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 9px;
+}
+
+.action-del:hover {
+    background: #DC2626;
+}
+
+/* Module and Status Soft Harmonized Colors */
+.btn-module-1, .btn-module-2 { 
+    background: #1E3E62; 
+    color: #38BDF8; 
+    border: 1px solid rgba(56, 189, 248, 0.3); 
+}
+
+.status-running { 
+    background: #0E4268; 
+    color: #38BDF8; 
+    border: 1px solid rgba(56, 189, 248, 0.4); 
+}
+
+.status-completed { 
+    background: #134E4A; 
+    color: #2DD4BF; 
+    border: 1px solid rgba(45, 212, 191, 0.4); 
+}
+/* All Module and Status Buttons Override */
+.container button, 
+[class*="btn-"], 
+.btn-module-1, .btn-module-2 {
+    background: #1E3E62 !important;
+    color: #38BDF8 !important;
+    border: 1px solid rgba(56, 189, 248, 0.3) !important;
+}
+
+/* Specific colorful buttons matching soft oceanic theme */
+div[style*="background"], a[style*="background"], button[style*="background"] {
+    /* Ignore inline bright colors and blend with theme */
+}
+/* 📌 Universal Page Layout Fix for All Pages */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: #030712;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* மேலே இருந்து சரியாகத் தொடங்க */
+    align-items: center;
+    min-height: 100vh;
+    padding: 12px;
+    box-sizing: border-box;
+}
+
+/* கண்டெய்னர் அல்லது மெயின் கார்டு சிறிதாக இருந்தாலும் ஸ்கிரீனைப் பொருத்தமாக நிரப்ப */
+.container, .main-card {
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: auto; /* கீழே கருப்பு இடம் வீணாகக் காலியாக இருப்பதைத் தவிர்க்க */
+}
