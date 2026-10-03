@@ -1,1 +1,546 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install Capacitor
+        run: |
+          if [ ! -f package.json ]; then
+            npm init -y
+          fi
+
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+
+      - name: Prepare www
+        run: |
+          mkdir -p www
+
+          rm -rf www/*
+
+          echo "Copying HTML files..."
+          find . -maxdepth 1 -type f -name "*.html" -exec cp {} www/ \;
+
+          echo "Copying JavaScript files..."
+          find . -maxdepth 1 -type f -name "*.js" -exec cp {} www/ \;
+
+          echo "Copying CSS files..."
+          find . -maxdepth 1 -type f -name "*.css" -exec cp {} www/ \;
+
+          echo "Copying folders..."
+
+          for item in assets images Data config icon; do
+            if [ -e "$item" ]; then
+              cp -r "$item" www/
+            fi
+          done
+
+          echo ""
+          echo "===== WWW CONTENT ====="
+          find www -maxdepth 3 -print
+          echo "======================="
+
+      - name: Init Capacitor
+        run: |
+          rm -f capacitor.config.json
+          rm -f capacitor.config.ts
+
+          cat > capacitor.config.json <<'EOF'
+          {
+            "appId": "com.kumar.texforever",
+            "appName": "Texforever",
+            "webDir": "www"
+          }
+          EOF
+
+      - name: Add Android
+        run: |
+          rm -rf android
+          npx cap add android
+
+      - name: Set Android Version
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          gradle = Path("android/app/build.gradle")
+          text = gradle.read_text()
+
+          version_code = max(3, int("${{ github.run_number }}") + 2)
+
+          insert = f'''
+          
+          android {{
+              defaultConfig {{
+                  versionCode {version_code}
+                  versionName "1.0.2"
+              }}
+          }}
+          '''
+
+          gradle.write_text(text + insert)
+
+          print("================================")
+          print("TEXFOREVER Android Version")
+          print("versionCode =", version_code)
+          print("versionName = 1.0.2")
+          print("================================")
+          PY
+
+      - name: Set Custom App Icon
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick
+
+          echo "Searching for icon-512.ico..."
+
+          ICON_FILE=$(find . -type f \( -iname "icon-512.ico" \) | head -n 1)
+
+          if [ -z "$ICON_FILE" ]; then
+            echo "ERROR: icon-512.ico was not found anywhere in repository"
+            exit 1
+          fi
+
+          echo "Icon found: $ICON_FILE"
+
+          mkdir -p android/app/src/main/res/mipmap-mdpi
+          mkdir -p android/app/src/main/res/mipmap-hdpi
+          mkdir -p android/app/src/main/res/mipmap-xhdpi
+          mkdir -p android/app/src/main/res/mipmap-xxhdpi
+          mkdir -p android/app/src/main/res/mipmap-xxxhdpi
+
+          convert "$ICON_FILE" -resize 48x48 \
+            android/app/src/main/res/mipmap-mdpi/ic_texforever.png
+
+          convert "$ICON_FILE" -resize 72x72 \
+            android/app/src/main/res/mipmap-hdpi/ic_texforever.png
+
+          convert "$ICON_FILE" -resize 96x96 \
+            android/app/src/main/res/mipmap-xhdpi/ic_texforever.png
+
+          convert "$ICON_FILE" -resize 144x144 \
+            android/app/src/main/res/mipmap-xxhdpi/ic_texforever.png
+
+          convert "$ICON_FILE" -resize 192x192 \
+            android/app/src/main/res/mipmap-xxxhdpi/ic_texforever.png
+
+          echo "Custom icon PNG files created."
+
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+
+          if [ ! -f "$MANIFEST" ]; then
+            echo "ERROR: AndroidManifest.xml not found"
+            exit 1
+          fi
+
+          sed -i \
+            's#android:icon="@mipmap/ic_launcher"#android:icon="@mipmap/ic_texforever"#g' \
+            "$MANIFEST"
+
+          sed -i \
+            's#android:roundIcon="@mipmap/ic_launcher_round"#android:roundIcon="@mipmap/ic_texforever"#g' \
+            "$MANIFEST"
+
+          echo "Custom TEXFOREVER icon connected to AndroidManifest.xml."
+
+          echo "===== ICON FILES ====="
+          find android/app/src/main/res -type f -name "ic_texforever*" -print
+          echo "====================="
+
+      - name: Create storage plugin
+        run: |
+          mkdir -p android/app/src/main/java/com/kumar/texforever
+
+          cat > android/app/src/main/java/com/kumar/texforever/TexforeverStoragePlugin.java <<'EOF'
+          package com.kumar.texforever;
+
+          import android.app.Activity;
+          import android.content.Intent;
+          import android.net.Uri;
+          import android.provider.DocumentsContract;
+
+          import androidx.activity.result.ActivityResult;
+
+          import com.getcapacitor.JSObject;
+          import com.getcapacitor.Plugin;
+          import com.getcapacitor.PluginCall;
+          import com.getcapacitor.PluginMethod;
+          import com.getcapacitor.annotation.ActivityCallback;
+          import com.getcapacitor.annotation.CapacitorPlugin;
+
+          import java.io.OutputStream;
+
+          @CapacitorPlugin(name = "TexforeverStorage")
+          public class TexforeverStoragePlugin extends Plugin {
+
+              @PluginMethod
+              public void selectFolder(PluginCall call) {
+
+                  Intent intent =
+                      new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+
+                  intent.addFlags(
+                      Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                      Intent.FLAG_GRANT_WRITE_URI_PERMISSION |
+                      Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION |
+                      Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
+                  );
+
+                  startActivityForResult(
+                      call,
+                      intent,
+                      "folderPickerResult"
+                  );
+              }
+
+              @ActivityCallback
+              private void folderPickerResult(
+                      PluginCall call,
+                      ActivityResult result) {
+
+                  if (
+                      result == null ||
+                      result.getResultCode() != Activity.RESULT_OK
+                  ) {
+                      call.reject("Folder selection cancelled");
+                      return;
+                  }
+
+                  Intent data = result.getData();
+
+                  if (data == null) {
+                      call.reject("Selected folder data is empty");
+                      return;
+                  }
+
+                  Uri uri = data.getData();
+
+                  if (uri == null) {
+                      call.reject("Selected folder URI is empty");
+                      return;
+                  }
+
+                  try {
+
+                      int takeFlags =
+                          data.getFlags() &
+                          (
+                              Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                              Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                          );
+
+                      getContext()
+                          .getContentResolver()
+                          .takePersistableUriPermission(
+                              uri,
+                              takeFlags
+                          );
+
+                  } catch (Exception ignored) {
+                  }
+
+                  JSObject resultData = new JSObject();
+
+                  resultData.put(
+                      "uri",
+                      uri.toString()
+                  );
+
+                  resultData.put(
+                      "name",
+                      getFolderName(uri)
+                  );
+
+                  call.resolve(resultData);
+              }
+
+              private String getFolderName(Uri uri) {
+
+                  try {
+
+                      String path = uri.getPath();
+
+                      if (path != null) {
+
+                          int index =
+                              path.lastIndexOf(':');
+
+                          if (
+                              index >= 0 &&
+                              index < path.length() - 1
+                          ) {
+
+                              return path.substring(index + 1);
+                          }
+                      }
+
+                  } catch (Exception ignored) {
+                  }
+
+                  return "Selected Folder";
+              }
+
+              @PluginMethod
+              public void saveBackup(PluginCall call) {
+
+                  String fileName =
+                      call.getString("fileName");
+
+                  String base64Data =
+                      call.getString("data");
+
+                  String folderUriString =
+                      call.getString("folderUri");
+
+                  if (
+                      fileName == null ||
+                      base64Data == null ||
+                      folderUriString == null
+                  ) {
+                      call.reject(
+                          "Missing backup data or folder"
+                      );
+                      return;
+                  }
+
+                  try {
+
+                      Uri treeUri =
+                          Uri.parse(folderUriString);
+
+                      String treeDocumentId =
+                          DocumentsContract.getTreeDocumentId(
+                              treeUri
+                          );
+
+                      Uri parentDocumentUri =
+                          DocumentsContract.buildDocumentUriUsingTree(
+                              treeUri,
+                              treeDocumentId
+                          );
+
+                      Uri fileUri =
+                          DocumentsContract.createDocument(
+                              getContext().getContentResolver(),
+                              parentDocumentUri,
+                              "application/json",
+                              fileName
+                          );
+
+                      if (fileUri == null) {
+                          call.reject(
+                              "Unable to create backup file"
+                          );
+                          return;
+                      }
+
+                      byte[] bytes =
+                          android.util.Base64.decode(
+                              base64Data,
+                              android.util.Base64.DEFAULT
+                          );
+
+                      try (
+                          OutputStream output =
+                              getContext()
+                                  .getContentResolver()
+                                  .openOutputStream(fileUri)
+                      ) {
+
+                          if (output == null) {
+                              call.reject(
+                                  "Unable to open selected folder"
+                              );
+                              return;
+                          }
+
+                          output.write(bytes);
+                          output.flush();
+                      }
+
+                      JSObject resultData =
+                          new JSObject();
+
+                      resultData.put(
+                          "success",
+                          true
+                      );
+
+                      resultData.put(
+                          "fileName",
+                          fileName
+                      );
+
+                      resultData.put(
+                          "uri",
+                          fileUri.toString()
+                      );
+
+                      call.resolve(resultData);
+
+                  } catch (Exception e) {
+
+                      call.reject(
+                          "Backup save failed: " +
+                          (
+                              e.getMessage() != null
+                              ? e.getMessage()
+                              : "Unknown error"
+                          )
+                      );
+                  }
+              }
+          }
+          EOF
+
+      - name: Create MainActivity
+        run: |
+          cat > android/app/src/main/java/com/kumar/texforever/MainActivity.java <<'EOF'
+          package com.kumar.texforever;
+
+          import android.os.Bundle;
+
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+
+              @Override
+              public void onCreate(Bundle savedInstanceState) {
+
+                  registerPlugin(
+                      TexforeverStoragePlugin.class
+                  );
+
+                  super.onCreate(savedInstanceState);
+              }
+          }
+          EOF
+
+      - name: Java compatibility
+        run: |
+          cat >> android/app/build.gradle <<'EOF'
+
+          android {
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_21
+                  targetCompatibility JavaVersion.VERSION_21
+              }
+          }
+          EOF
+
+      - name: Sync Capacitor
+        run: |
+          npx cap sync android
+
+      - name: Configure Release Signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.TEXFOREVER_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.TEXFOREVER_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.TEXFOREVER_KEY_ALIAS }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/texforever-release.jks
+
+          cat >> android/app/build.gradle <<'EOF'
+
+          android {
+              signingConfigs {
+                  release {
+                      storeFile file("texforever-release.jks")
+                      storePassword System.getenv("KEYSTORE_PASSWORD")
+                      keyAlias System.getenv("KEY_ALIAS")
+                      keyPassword System.getenv("KEYSTORE_PASSWORD")
+                  }
+              }
+
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.release
+                  }
+              }
+          }
+          EOF
+
+          echo "Release signing configuration added."
+
+      - name: Verify WWW
+        run: |
+          echo ""
+          echo "========== WWW =========="
+          find www -maxdepth 3 -print
+          echo "========================="
+
+          echo ""
+          echo "========== ANDROID ASSETS =========="
+          find android/app/src/main/assets -maxdepth 4 -print 2>/dev/null || true
+          echo "===================================="
+
+          echo ""
+          echo "========== CUSTOM ICON =========="
+          find android/app/src/main/res -type f -name "ic_texforever*" -print
+          echo "================================"
+
+      - name: Build Release APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.TEXFOREVER_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.TEXFOREVER_KEY_ALIAS }}
+        run: |
+          chmod +x android/gradlew
+
+          cd android
+
+          ./gradlew assembleRelease --stacktrace
+
+      - name: Rename Release APK
+        run: |
+          mv android/app/build/outputs/apk/release/app-release.apk \
+             android/app/build/outputs/apk/release/TEXFOREVER.apk
+
+      - name: Build Developer Debug APK
+        run: |
+          cd android
+
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Rename Debug APK
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk \
+             android/app/build/outputs/apk/debug/TEXFOREVER-debug.apk
+
+      - name: Verify APK Files
+        run: |
+          echo "========== RELEASE APK =========="
+          ls -lh android/app/build/outputs/apk/release/TEXFOREVER.apk
+
+          echo ""
+          echo "========== DEBUG APK =========="
+          ls -lh android/app/build/outputs/apk/debug/TEXFOREVER-debug.apk
+
+      - name: Upload Android Developer Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: TEXFOREVER-Android-Developer
+          path: |
+            android/app/build/outputs/apk/release/TEXFOREVER.apk
+            android/app/build/outputs/apk/debug/TEXFOREVER-debug.apk
+          if-no-files-found: error
 
