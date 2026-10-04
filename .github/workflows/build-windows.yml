@@ -58,7 +58,7 @@ jobs:
       - name: Upload Windows Build
         uses: actions/upload-artifact@v4
         with:
-          name: TEXFOREVER-Windows-Build
+          name: TEX FOR EVER-Windows-Build
           path: |
             dist/*.exe
             dist/win-unpacked/**
