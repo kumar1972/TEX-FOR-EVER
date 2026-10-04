@@ -1,1 +1,41 @@
+name: Create Android Signing Key
 
+on:
+  workflow_dispatch: {}
+
+jobs:
+  create-key:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Create signing key
+        run: |
+          mkdir -p signing
+
+          keytool -genkeypair -v \
+            -keystore signing/tex for ever-release.jks \
+            -alias tex for ever \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass texforever123 \
+            -keypass texforever123 \
+            -dname "CN=TEX FOR EVER, OU=TEX FOR EVER, O=TEX FOR EVER, L=Coimbatore, ST=Tamil Nadu, C=IN"
+
+      - name: Create Base64
+        run: |
+          base64 -w 0 signing/tex for ever-release.jks > tex for ever-keystore-base64.txt
+
+      - name: Upload signing key
+        uses: actions/upload-artifact@v4
+        with:
+          name: TEX FOR EVER-Signing-Key
+          path: |
+            signing/tex for ever-release.jks
+            tex for ever-keystore-base64.txt
