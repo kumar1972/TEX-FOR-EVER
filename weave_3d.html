@@ -584,12 +584,12 @@ input, select {
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
             <div>
-                <label>⚙️️ Denting</label>
-                <input type="text" id="dentingPatternInput" value="2" oninput="autoRefresh3D()" placeholder="Eg: 2">
+                <label>⚙ Denting</label>
+                <input type="text" id="dentingPatternInput" value="" oninput="autoRefresh3D()" placeholder="Eg: 2">
             </div>
             <div>
                 <label>🔀 Drawing</label>
-                <input type="text" id="drawingPatternInput" value="(1,2,3,4)*2,(2,1,4,3)*2" oninput="autoRefresh3D()" placeholder="Eg: (1,2,3,4)*2,(2,1,4,3)*2">
+                <input type="text" id="drawingPatternInput" value="" oninput="autoRefresh3D()" placeholder="Eg: 1,2,3,4">
             </div>
         </div>
 
@@ -1594,14 +1594,18 @@ function loadSelectedDesign(){
 
         let mCols = (weavePatterns.custom && weavePatterns.custom[0]) ? weavePatterns.custom[0].length : 4;
 
-        let drawVal = sourceObj.drawingPatternFormula || sourceObj.drawingPattern || sourceObj.drawingOrder || sourceObj.drawing_order || sourceObj.draft || "";
+        // denting_editor.html il save seiyappatta data-kku mudhal urimai (Priority)
+        let drawVal = (dentDrawMatch && (dentDrawMatch.drawingPatternFormula || dentDrawMatch.drawingPattern || dentDrawMatch.drawingOrder || dentDrawMatch.draft)) || 
+                      sourceObj.drawingPatternFormula || sourceObj.drawingPattern || sourceObj.drawingOrder || sourceObj.drawing_order || sourceObj.draft || "";
+        
         if (!drawVal || (drawVal === "1,2,3,4" && mCols > 4)) {
             let autoArr = [];
             for(let f=1; f<=mCols; f++) autoArr.push(f);
             drawVal = autoArr.join(",");
         }
 
-        let dentVal = sourceObj.dentingPatternFormula || sourceObj.dentingPattern || sourceObj.dentingOrder || sourceObj.denting_order || "2";
+        let dentVal = (dentDrawMatch && (dentDrawMatch.dentingPatternFormula || dentDrawMatch.dentingPattern || dentDrawMatch.dentingOrder)) || 
+                      sourceObj.dentingPatternFormula || sourceObj.dentingPattern || sourceObj.dentingOrder || sourceObj.denting_order || "2";
 
         activeDesignObj.drawingPatternFormula = drawVal;
         activeDesignObj.drawingPattern = drawVal;
@@ -1696,11 +1700,10 @@ async function saveCurrentDesign() {
         setStatus("⏳ Saving...");
         let currentInputs = getCurrentData();
         let data = activeDesignObj ? clone(activeDesignObj) : {}; 
-        // Don't overwrite warpLines and weftLines - preserve original colors for other pages
-        // Only update the custom design-specific properties
-              Object.assign(data, {
-            warpLines: currentInputs.warpLines,       // Added to save warp colors
-            weftLines: currentInputs.weftLines,       // Added to save weft colors
+        
+        Object.assign(data, {
+            warpLines: currentInputs.warpLines,       
+            weftLines: currentInputs.weftLines,       
             customMatrix: currentInputs.customMatrix,
             type: currentInputs.type,
             dentingPattern: currentInputs.dentingPattern,
@@ -3234,265 +3237,6 @@ async function executeRealA4Print() {
     }
 }
 
-
-function printDesign() {
-    try {
-        const modal = $("printModalBox");
-        const container = $("printDesignContent");
-        if (!modal || !container) {
-            alert("Print template container கிடைக்கவில்லை.");
-            return;
-        }
-        container.innerHTML = buildDesignPrintContent();
-        applyPrintGraphScale();
-        modal.style.display = "flex";
-        document.body.style.overflow = "hidden";
-    } catch(err) {
-        console.error("Print Design Error:", err);
-        alert("Print error: " + err.message);
-    }
-}
-
-function applyPrintGraphScale() {
-    const box = $("printDesignContent");
-    if (!box) return;
-    const sizes = { small: ["5mm","9px"], medium: ["8mm","13px"], large: ["11mm","18px"] };
-    const v = sizes[$("printGraphScale")?.value] || sizes.medium;
-    box.style.setProperty("--gcell", v[0]);
-    box.style.setProperty("--gfont", v[1]);
-}
-
-function closeGraphPrintPreview() {
-    const modal = $("printModalBox");
-    if (modal) {
-        modal.style.display = "none";
-    }
-    document.body.style.overflow = "";
-    drawFramePending = false;
-}
-
-// Print mudithu thirumba app-kku varum pothu scroll matrum view unlock aaga
-window.addEventListener("afterprint", () => {
-    document.body.style.overflow = "";
-    drawFramePending = false;
-    let pm = $("printModalBox");
-    if (pm && pm.style.display === "flex") {
-        pm.style.display = "none";
-    }
-});
-
-// Android print preview sheet-il irundhu back vandhadhum auto-unlock aaga
-window.addEventListener("focus", () => {
-    setTimeout(() => {
-        document.body.style.overflow = "";
-        drawFramePending = false;
-        let cModal = $("cadPrintModal");
-        if(cModal) cModal.style.display = "none";
-    }, 250);
-});
-
-async function triggerRealPrint() {
-    const fs = $("fsModal");
-    const wasFsOpen = fs && fs.style.display === "flex";
-    if (wasFsOpen) fs.style.display = "none";
-
-    // Capacitor Native Printer check
-    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Printer) {
-        try {
-            const printContent = $("printDesignContent").innerHTML;
-            await window.Capacitor.Plugins.Printer.print({
-                content: `<html><head><style>
-                    body { font-family: sans-serif; padding: 10px; color: #000; }
-                    table { width: 100%; border-collapse: collapse; }
-                    th, td { border: 1px solid #333; padding: 4px; text-align: center; }
-                </style></head><body>${printContent}</body></html>`
-            });
-        } catch (err) {
-            console.error("Native print error:", err);
-            window.print();
-        }
-    } else {
-        // Browser fallback
-        window.print();
-    }
-
-    // Print dialogue mudindhavudan scroll & display unlock
-    setTimeout(() => {
-        document.body.style.overflow = wasFsOpen ? "hidden" : "";
-        drawFramePending = false;
-        if (wasFsOpen) {
-            fs.style.display = "flex";
-            draw3DWeave();
-        }
-    }, 300);
-}
-
-function updatePrintOrientation() {
-    const orientation = $("printOrientation")?.value || "portrait";
-    let styleEl = $("dynamicPrintPageStyle");
-    if (!styleEl) {
-        styleEl = document.createElement("style");
-        styleEl.id = "dynamicPrintPageStyle";
-        document.head.appendChild(styleEl);
-    }
-    styleEl.innerHTML = `@page { size: A4 ${orientation}; margin: 6mm; }`;
-}
-
-function getPrintBracketMap(str, isCol=false) {
-    let map = {}; let skip = {}; let isTop = {}; let isBot = {};
-    if(!str) return {map, skip, isTop, isBot};
-    let s = str.toLowerCase().replace(/\s+/g, '').replace(/[x×X*]/g, '*');
-    let parts = s.split(',');
-    let currentIdx = 1;
-    
-    for(let p of parts) {
-        let match = /(?:\()?(\d+)-(\d+)(?:\))?\*(\d+)/.exec(p);
-        if(match) {
-            let top = Math.max(parseInt(match[1]), parseInt(match[2]));
-            let bot = Math.min(parseInt(match[1]), parseInt(match[2]));
-            let span = top - bot + 1;
-            let text = `× ${parseInt(match[3])} Set`;
-            
-            if(isCol) {
-                map[bot] = {span, text}; 
-                isBot[bot] = true; isTop[top] = true;
-                for(let i=bot+1; i<=top; i++) skip[i] = true;
-            } else {
-                map[top] = {span, text}; 
-                isTop[top] = true; isBot[bot] = true;
-                for(let i=top-1; i>=bot; i--) skip[i] = true;
-            }
-        }
-    }
-    return {map, skip, isTop, isBot};
-}
-
-function getPrintMatrix() {
-    let type = $("weaveType")?.value || activeDesignObj?.type || "custom";
-    let m = type === "custom" ? weavePatterns.custom : weavePatterns[type];
-    if(!Array.isArray(m) || !m.length || !Array.isArray(m[0]) || !m[0].length) m = weavePatterns.custom;
-    return m;
-}
-
-function buildPrintGraph(m, pickStr) {
-    let rowB = getPrintBracketMap(pickStr, false);
-    let html = '<table class="print-graph-table">';
-    
-    for(let r=0; r<m.length; r++) {
-        let rowNum = m.length - r;
-        html += `<tr><td class="graph-axis">${rowNum}</td>`;
-        
-        for(let c=0; c<m[r].length; c++) {
-            let bTop = rowB.isTop[rowNum] ? "2.5px solid #000" : "1px solid #3f4d46";
-            let bBot = rowB.isBot[rowNum] ? "2.5px solid #000" : "1px solid #3f4d46";
-            let borderStyle = `border-top:${bTop}; border-bottom:${bBot}; border-left:1px solid #3f4d46; border-right:1px solid #3f4d46;`;
-            
-            html += `<td style="${borderStyle}">${m[r][c] ? "×" : ""}</td>`;
-        }
-        
-        if(rowB.map[rowNum]) {
-            let span = rowB.map[rowNum].span;
-            let text = rowB.map[rowNum].text;
-            html += `<td rowspan="${span}" style="padding-left:4px; border:none; vertical-align:middle; text-align:left; white-space:nowrap; background:#fff !important;">
-                        <div style="display:inline-flex; align-items:center; height:100%;">
-                            <span style="font-size: calc(${span} * 16px); line-height: 1; font-weight: 200; color: #d32f2f; margin-right: 4px;">}</span>
-                            <span style="color:#d32f2f; font-weight:900; font-size:10px;">${text}</span>
-                        </div>
-                     </td>`;
-        } else if(!rowB.skip[rowNum]) {
-            html += `<td style="border:none; background:#fff !important;"></td>`;
-        }
-        
-        html += "</tr>";
-    }
-    
-    html += '<tr><td class="graph-axis"></td>';
-    for(let c=1; c<=m[0].length; c++) html += `<td class="graph-axis">${c}</td>`;
-    html += "</tr></table>";
-    
-    return html;
-}
-
-function buildWarpTable(lines) {
-    if(!lines || !lines.length) return "<div style='font-size:8px;text-align:center;padding:5px;border:1px solid #ccc;'>No Yarns</div>";
-    
-    let expandedGroups = [];
-    let ranges = activeDesignObj?.warpRanges || [];
-    let i = 0;
-    
-    while(i < lines.length) {
-        let lineNum = i + 1;
-        let range = ranges.find(r => Number(r.start) === lineNum);
-        if(range && Number(range.end) >= Number(range.start) && Number(range.set) > 1) {
-            let setRows = [];
-            let span = Number(range.end) - Number(range.start) + 1;
-            for(let j = 0; j < span && (i+j) < lines.length; j++) {
-                setRows.push(lines[i+j]);
-            }
-            expandedGroups.push({
-                isSet: true,
-                setStart: range.start,
-                setEnd: range.end,
-                totalRepeats: range.set,
-                rows: setRows
-            });
-            i += span;
-        } else {
-            expandedGroups.push({
-                isSet: false,
-                row: lines[i]
-            });
-            i++;
-        }
-    }
-
-    let h = `<table class="yarn-table">
-        <thead>
-            <tr>
-                <th width="6%">#</th>
-                <th width="8%">Col</th>
-                <th width="42%" style="text-align:left;">Colour Name</th>
-                <th width="14%">Ends</th>
-                <th width="12%">Set</th>
-                <th width="18%">Drawing</th>
-            </tr>
-        </thead>
-        <tbody>`;
-    
-        
-            let visualRowIdx = 1;
-
-    let rawDraw = document.getElementById("drawingPatternInput")?.value || activeDesignObj?.drawingPatternFormula || activeDesignObj?.drawingPattern || "1,2,3,4";
-    let drawArr = expandPattern(rawDraw);
-    if (!drawArr || drawArr.length === 0) drawArr = [1,2,3,4];
-    let L = drawArr.length;
-    let globalThreadIndex = 0;
-
-    expandedGroups.forEach((item, idx) => {
-        if(item.isSet) {
-            let totalRep = item.totalRepeats;
-            let spanLen = item.rows.length;
-            let setTotalEnds = 0;
-
-            item.rows.forEach((l, sIdx) => {
-                let rawCol = l.colourName || l.origName || "";
-                let pureColorName = cleanBaseColorName(rawCol);
-                let cleanName = getLocalizedColorName(pureColorName) || pureColorName || "Custom";
-                
-                let amt = parseInt(l.ends) || 0;
-                setTotalEnds += amt;
-                let assignedDraw = "-";
-                
-                if (amt > 0) {
-                    let shiftedBase = [];
-                    for(let k=0; k<L; k++) shiftedBase.push(drawArr[(globalThreadIndex + k) % L]);
-                    let repeats = Math.floor(amt / L);
-                    let remainder = amt % L;
-                    let remArr = [];
-                    for(let k=0; k<remainder; k++) remArr.push(drawArr[(globalThreadIndex + repeats * L + k) % L]);
-                    
-                    if (repeats >= 2) {
-                        assignedDraw = `(${shiftedBase.join(",")})&times;${repeats}`;
 function buildWarpTable(lines) {
     if(!lines || !lines.length) return "<div style='font-size:8px;text-align:center;padding:5px;border:1px solid #ccc;'>No Yarns</div>";
     
@@ -3704,6 +3448,184 @@ function buildDesignPrintContent() {
             <span>Generated: ${stamp}</span>
         </div>
     `;
+}
+
+function printDesign() {
+    try {
+        const modal = $("printModalBox");
+        const container = $("printDesignContent");
+        if (!modal || !container) {
+            alert("Print template container கிடைக்கவில்லை.");
+            return;
+        }
+        container.innerHTML = buildDesignPrintContent();
+        applyPrintGraphScale();
+        modal.style.display = "flex";
+        document.body.style.overflow = "hidden";
+    } catch(err) {
+        console.error("Print Design Error:", err);
+        alert("Print error: " + err.message);
+    }
+}
+
+function applyPrintGraphScale() {
+    const box = $("printDesignContent");
+    if (!box) return;
+    const sizes = { small: ["5mm","9px"], medium: ["8mm","13px"], large: ["11mm","18px"] };
+    const v = sizes[$("printGraphScale")?.value] || sizes.medium;
+    box.style.setProperty("--gcell", v[0]);
+    box.style.setProperty("--gfont", v[1]);
+}
+
+function closeGraphPrintPreview() {
+    const modal = $("printModalBox");
+    if (modal) {
+        modal.style.display = "none";
+    }
+    document.body.style.overflow = "";
+    drawFramePending = false;
+}
+
+// Print mudithu thirumba app-kku varum pothu scroll matrum view unlock aaga
+window.addEventListener("afterprint", () => {
+    document.body.style.overflow = "";
+    drawFramePending = false;
+    let pm = $("printModalBox");
+    if (pm && pm.style.display === "flex") {
+        pm.style.display = "none";
+    }
+});
+
+// Android print preview sheet-il irundhu back vandhadhum auto-unlock aaga
+window.addEventListener("focus", () => {
+    setTimeout(() => {
+        document.body.style.overflow = "";
+        drawFramePending = false;
+        let cModal = $("cadPrintModal");
+        if(cModal) cModal.style.display = "none";
+    }, 250);
+});
+
+async function triggerRealPrint() {
+    const fs = $("fsModal");
+    const wasFsOpen = fs && fs.style.display === "flex";
+    if (wasFsOpen) fs.style.display = "none";
+
+    // Capacitor Native Printer check
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Printer) {
+        try {
+            const printContent = $("printDesignContent").innerHTML;
+            await window.Capacitor.Plugins.Printer.print({
+                content: `<html><head><style>
+                    body { font-family: sans-serif; padding: 10px; color: #000; }
+                    table { width: 100%; border-collapse: collapse; }
+                    th, td { border: 1px solid #333; padding: 4px; text-align: center; }
+                </style></head><body>${printContent}</body></html>`
+            });
+        } catch (err) {
+            console.error("Native print error:", err);
+            window.print();
+        }
+    } else {
+        // Browser fallback
+        window.print();
+    }
+
+    // Print dialogue mudindhavudan scroll & display unlock
+    setTimeout(() => {
+        document.body.style.overflow = wasFsOpen ? "hidden" : "";
+        drawFramePending = false;
+        if (wasFsOpen) {
+            fs.style.display = "flex";
+            draw3DWeave();
+        }
+    }, 300);
+}
+
+function updatePrintOrientation() {
+    const orientation = $("printOrientation")?.value || "portrait";
+    let styleEl = $("dynamicPrintPageStyle");
+    if (!styleEl) {
+        styleEl = document.createElement("style");
+        styleEl.id = "dynamicPrintPageStyle";
+        document.head.appendChild(styleEl);
+    }
+    styleEl.innerHTML = `@page { size: A4 ${orientation}; margin: 6mm; }`;
+}
+
+function getPrintBracketMap(str, isCol=false) {
+    let map = {}; let skip = {}; let isTop = {}; let isBot = {};
+    if(!str) return {map, skip, isTop, isBot};
+    let s = str.toLowerCase().replace(/\s+/g, '').replace(/[x×X*]/g, '*');
+    let parts = s.split(',');
+    let currentIdx = 1;
+    
+    for(let p of parts) {
+        let match = /(?:\()?(\d+)-(\d+)(?:\))?\*(\d+)/.exec(p);
+        if(match) {
+            let top = Math.max(parseInt(match[1]), parseInt(match[2]));
+            let bot = Math.min(parseInt(match[1]), parseInt(match[2]));
+            let span = top - bot + 1;
+            let text = `× ${parseInt(match[3])} Set`;
+            
+            if(isCol) {
+                map[bot] = {span, text}; 
+                isBot[bot] = true; isTop[top] = true;
+                for(let i=bot+1; i<=top; i++) skip[i] = true;
+            } else {
+                map[top] = {span, text}; 
+                isTop[top] = true; isBot[bot] = true;
+                for(let i=top-1; i>=bot; i--) skip[i] = true;
+            }
+        }
+    }
+    return {map, skip, isTop, isBot};
+}
+
+function getPrintMatrix() {
+    let type = $("weaveType")?.value || activeDesignObj?.type || "custom";
+    let m = type === "custom" ? weavePatterns.custom : weavePatterns[type];
+    if(!Array.isArray(m) || !m.length || !Array.isArray(m[0]) || !m[0].length) m = weavePatterns.custom;
+    return m;
+}
+
+function buildPrintGraph(m, pickStr) {
+    let rowB = getPrintBracketMap(pickStr, false);
+    let html = '<table class="print-graph-table">';
+    
+    for(let r=0; r<m.length; r++) {
+        let rowNum = m.length - r;
+        html += `<tr><td class="graph-axis">${rowNum}</td>`;
+        
+        for(let c=0; c<m[r].length; c++) {
+            let bTop = rowB.isTop[rowNum] ? "2.5px solid #000" : "1px solid #3f4d46";
+            let bBot = rowB.isBot[rowNum] ? "2.5px solid #000" : "1px solid #3f4d46";
+            let borderStyle = `border-top:${bTop}; border-bottom:${bBot}; border-left:1px solid #3f4d46; border-right:1px solid #3f4d46;`;
+            
+            html += `<td style="${borderStyle}">${m[r][c] ? "×" : ""}</td>`;
+        }
+        
+        if(rowB.map[rowNum]) {
+            let span = rowB.map[rowNum].span;
+            let text = rowB.map[rowNum].text;
+            html += `<td rowspan="${span}" style="padding-left:4px; border:none; vertical-align:middle; text-align:left; white-space:nowrap; background:#fff !important;">
+                        <div style="display:inline-flex; align-items:center; height:100%;">
+                            <span style="font-size: calc(${span} * 16px); line-height: 1; font-weight: 200; color: #d32f2f; margin-right: 4px;">}</span>
+                            <span style="color:#d32f2f; font-weight:900; font-size:10px;">${text}</span>
+                        </div>
+                     </td>`;
+        } else if(!rowB.skip[rowNum]) {
+            html += `<td style="border:none; background:#fff !important;"></td>`;
+        }
+        
+        html += "</tr>";
+    }
+    
+    html += '<tr><td class="graph-axis"></td>';
+    for(let c=1; c<=m[0].length; c++) html += `<td class="graph-axis">${c}</td>`;
+    html += "</tr></table>";
+    
+    return html;
 }
 
 // Immediate execution loader
