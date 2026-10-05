@@ -1698,7 +1698,9 @@ async function saveCurrentDesign() {
         let data = activeDesignObj ? clone(activeDesignObj) : {}; 
         // Don't overwrite warpLines and weftLines - preserve original colors for other pages
         // Only update the custom design-specific properties
-        Object.assign(data, {
+              Object.assign(data, {
+            warpLines: currentInputs.warpLines,       // Added to save warp colors
+            weftLines: currentInputs.weftLines,       // Added to save weft colors
             customMatrix: currentInputs.customMatrix,
             type: currentInputs.type,
             dentingPattern: currentInputs.dentingPattern,
@@ -1714,11 +1716,7 @@ async function saveCurrentDesign() {
         if(!name) { setStatus("⚡ Ready"); return; }
         
         if(activeDesignObj?.id) data.id = activeDesignObj.id;
-        // IMPORTANT: Do NOT save modified warpLines and weftLines to localStorage
-        // This ensures warp_entry.html and design_sheet_print.html keep the original colors
-        // Color changes on 3D page stay only in local UI, not persisted to entry data
-        // data.warpLines = currentInputs.warpLines;
-        // data.weftLines = currentInputs.weftLines;
+
         data.designNo = name; 
         data.name = name; 
         data.timestamp = new Date().toISOString();
@@ -3461,15 +3459,16 @@ function buildWarpTable(lines) {
         </thead>
         <tbody>`;
     
-    let visualRowIdx = 1;
+        let visualRowIdx = 1;
+
+    // Drawing array length-ai kandupidika
+    let rawDraw = document.getElementById("drawingPatternInput")?.value || activeDesignObj?.drawingPatternFormula || "1,2,3,4";
+    let basePatternArr = rawDraw.replace(/[()]/g, '').split(',').map(x => x.trim().split('*')[0]).filter(x => !isNaN(parseInt(x)));
+    if (basePatternArr.length === 0) basePatternArr = [1,2,3,4];
+    let baseLen = basePatternArr.length;
+    let baseStr = basePatternArr.join(',');
 
     expandedGroups.forEach((item, idx) => {
-        let lineDrawingFormulas = [
-            "(1,2,3,4)×2",
-            "(2,1,4,3)×2"
-        ];
-        let assignedDraw = lineDrawingFormulas[idx % lineDrawingFormulas.length];
-
         if(item.isSet) {
             let totalRep = item.totalRepeats;
             let spanLen = item.rows.length;
@@ -3478,7 +3477,11 @@ function buildWarpTable(lines) {
                 let rawCol = l.colourName || l.origName || "";
                 let pureColorName = cleanBaseColorName(rawCol);
                 let cleanName = getLocalizedColorName(pureColorName) || pureColorName || "Custom";
+                
                 let amt = parseInt(l.ends) || 0;
+                let repeats = Math.ceil(amt / baseLen) || 1;
+                let assignedDraw = `(${baseStr}) &times; ${repeats}`;
+
                 
                 let setTd = "";
                 if (sIdx === 0) {
@@ -3506,14 +3509,19 @@ function buildWarpTable(lines) {
             });
 
         } else {
+                  
             let l = item.row;
             let rawCol = l.colourName || l.origName || "";
             let pureColorName = cleanBaseColorName(rawCol);
             let cleanName = getLocalizedColorName(pureColorName) || pureColorName || "Custom";
+            
             let amt = parseInt(l.ends) || 0;
+            let repeats = Math.ceil(amt / baseLen) || 1;
+            let assignedDraw = `(${baseStr}) &times; ${repeats}`;
             
             h += `<tr>
                 <td>${visualRowIdx++}</td>
+
                 <td><div class="color-swatch" style="background:${l.hex || l.color};"></div></td>
                 <td style="text-align:left; font-weight:800; line-height:1.2; color:#111827 !important;">${cleanName}</td>
                 <td style="font-weight:950; font-size:10px;">${amt}</td>
