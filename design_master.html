@@ -384,12 +384,10 @@
     let designList = [];
     let tempBitmapData = "";
 
-    // UPDATED: Better cleaning logic to handle '#' symbols and extra spaces reliably
     function cleanDesignName(str) { 
         return str ? str.toString().replace(/#/g, '').replace(/\s+/g, ' ').trim().toLowerCase() : ''; 
     }
     
-    // Puthiya helper: User kku kaattum podhu oru # symbol mattum varuvadharku
     function formatDisplayDesignName(str) {
         if(!str) return '';
         let s = str.toString().replace(/#/g, '').replace(/\s+/g, ' ').trim();
@@ -405,7 +403,6 @@
         return true; 
     }
 
-    // Tab Switching Function
     function switchMgmtTab(paneId, btnElem) {
         document.querySelectorAll('.mgmt-pane').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.mgmt-tab-btn').forEach(b => b.classList.remove('active'));
@@ -413,7 +410,6 @@
         btnElem.classList.add('active');
     }
 
-    // Full Screen Excel Table View Modal Functions
     function openFullscreenViewModal() {
         let tbody = document.getElementById('excelTableBody');
         let html = '';
@@ -489,7 +485,6 @@
         let masterNames = Array.isArray(masters) ? masters.map(d => d.name || d.designNo).filter(Boolean) : [];
         let allRawNames = [...preDesigns, ...masterNames, ...Object.keys(specs)];
         
-        // Clean peyargalai mattum vatchu unique aaga oru list uruvakkugidrom
         let uniqueCleanNames = new Set();
         designList = [];
         
@@ -497,13 +492,12 @@
             let cln = cleanDesignName(rawName);
             if(cln && !uniqueCleanNames.has(cln)) {
                 uniqueCleanNames.add(cln);
-                designList.push(formatDisplayDesignName(rawName)); // Display aagum podhu onna aaga kattum
+                designList.push(formatDisplayDesignName(rawName)); 
             }
         });
 
         loadDesignDropdowns();
 
-        // Bind Weave Radio Buttons
         document.querySelectorAll('input[name="weaveSelection"]').forEach((radioBtn) => {
             radioBtn.addEventListener("change", function(event) {
                 document.getElementById("weave").value = event.target.value;
@@ -512,7 +506,6 @@
         });
     });
 
-    // 🟢 WEAVE DROPDOWN LOGIC 🟢
     window.openWeaveDropdown = function() {
         document.getElementById('weaveOverlay').style.display = 'flex';
         let currentValue = document.getElementById('weave').value;
@@ -525,7 +518,6 @@
         if(event.target.id === 'weaveOverlay') document.getElementById('weaveOverlay').style.display = 'none';
     };
 
-    // 🟢 AUTO CALCULATION LOGIC 🟢
     function updateFinishReed() {
         let fReed = parseFloat(document.getElementById('reed').value) || 0;
         document.getElementById('onloomReed').value = (fReed > 0) ? fReed - 8 : '';
@@ -553,7 +545,6 @@
         }
     }
 
-    // 🟢 PHOTO UPLOAD LOGIC 🟢
     window.openChoiceModal = () => document.getElementById('choiceModal').style.display = 'flex';
     window.closeChoiceModal = () => document.getElementById('choiceModal').style.display = 'none';
 
@@ -594,10 +585,10 @@
     }
 
     // 🟢 CLOUD SYNC LOGIC 🟢
-    async function syncDesignMasterToCloud(updatedList, updatedSpecs, activeDesignNo) {
+    async function syncDesignMasterToCloud(updatedList, updatedSpecs, activeDesignNo, isDelete = false, deleteDesignName = null) {
         let designMasters = Array.isArray(JSON.parse(localStorage.getItem('design_masters_data'))) ? JSON.parse(localStorage.getItem('design_masters_data')) : [];
         
-        if (activeDesignNo) {
+        if (activeDesignNo && !isDelete) {
             let specKey = getSpecKey(activeDesignNo);
             let s = updatedSpecs[specKey] || {};
             let mIndex = designMasters.findIndex(m => cleanDesignName(m.name || m.designNo) === cleanDesignName(activeDesignNo));
@@ -616,16 +607,30 @@
         localStorage.setItem('pre_design_numbers', JSON.stringify(updatedList));
         localStorage.setItem('design_specs', JSON.stringify(updatedSpecs));
         localStorage.setItem('design_masters_data', JSON.stringify(designMasters));
-        if(activeDesignNo) localStorage.setItem('selected_design_number', activeDesignNo);
+        if(activeDesignNo && !isDelete) localStorage.setItem('selected_design_number', activeDesignNo);
 
         if (window.supabaseSave) {
             await window.supabaseSave('pre_design_numbers', updatedList);
             await window.supabaseSave('design_specs', updatedSpecs);
             await window.supabaseSave('design_masters_data', designMasters);
         }
-        if (window.supabaseSaveIndividual && activeDesignNo) {
+        
+        if (window.supabaseSaveIndividual && activeDesignNo && !isDelete) {
             let key = getSpecKey(activeDesignNo);
             await window.supabaseSaveIndividual(key, updatedSpecs[key]);
+        }
+
+        if (isDelete && deleteDesignName && window.supabaseDelete) {
+            try {
+                let delKey = getSpecKey(deleteDesignName);
+                await window.supabaseDelete('design_specs', delKey);
+                await window.supabaseDelete('weave_designs', delKey); 
+                await window.supabaseDelete('denting_drawing_data', delKey);
+                await window.supabaseDelete('warp_entry_data', delKey);
+                await window.supabaseDelete('weft_entry_data', delKey);
+            } catch(e) {
+                console.log("Cloud delete skipped/failed for individual records", e);
+            }
         }
     }
 
@@ -642,15 +647,12 @@
         if(confirm(designNo + " delete pannalama?")){
             document.getElementById('delBtn').innerText = "⏳...";
             
-            // designList -lirundhu azhikka
             designList = designList.filter(x => cleanDesignName(x) !== cleanDelName);
             
-            // pre_design_numbers -lirundhu azhikka
             let preDesigns = JSON.parse(localStorage.getItem('pre_design_numbers')) || [];
             preDesigns = preDesigns.filter(x => cleanDesignName(x) !== cleanDelName);
             localStorage.setItem('pre_design_numbers', JSON.stringify(preDesigns));
 
-            // design_specs -lirundhu azhikka
             let designSpecs = JSON.parse(localStorage.getItem('design_specs') || '{}');
             Object.keys(designSpecs).forEach(k => {
                 if(cleanDesignName(k) === cleanDelName) {
@@ -658,20 +660,23 @@
                 }
             });
 
-            // design_masters_data -lirundhu azhikka
             let designMasters = JSON.parse(localStorage.getItem('design_masters_data')) || [];
             if(Array.isArray(designMasters)) {
                 designMasters = designMasters.filter(m => cleanDesignName(m.name || m.designNo) !== cleanDelName);
                 localStorage.setItem('design_masters_data', JSON.stringify(designMasters));
-                if (window.supabaseSave) await window.supabaseSave('design_masters_data', designMasters);
             }
             
             try {
                 localStorage.removeItem('selected_design_number');
-                await syncDesignMasterToCloud(preDesigns, designSpecs, null);
+                await syncDesignMasterToCloud(designList, designSpecs, null, true, designNo);
+                
                 loadDesignDropdowns(); 
                 clearForm();
-                if(window.showNotification) window.showNotification("Design deleted successfully!");
+                
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
+                
             } catch (err) {
                 if(window.showNotification) window.showNotification("Error deleting! " + err.message, "error");
             } finally { document.getElementById('delBtn').innerText = "🗑️ Del"; }
@@ -865,7 +870,6 @@
         } finally { document.getElementById('photoSaveBtn').innerText = "🖼️ Save Photo"; }
     };
 
-    // 🟢 UPDATED: LOAD DATA TO DROPDowns & FORM 🟢
     function loadDesignDropdowns() {
         let dropdownIds = ['editDesignSelect', 'renameDesignSelect'];
         let html = '<option value="">Select Design</option>';
