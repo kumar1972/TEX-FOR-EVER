@@ -1,8 +1,8 @@
 
 {
-  "name": "tex for ever",
+  "name": "texforever",
   "version": "1.0.0",
-  "description": "TEX FOR EVER - Web Application",
+  "description": "TEXFOREVER - Web Application",
   "private": true,
   "homepage": "./",
   "main": "main.js",
@@ -19,7 +19,7 @@
   },
   "build": {
     "appId": "com.kumar.texforever",
-    "productName": "TEX FOR EVER",
+    "productName": "TEXFOREVER",
     "directories": {
       "output": "dist"
     },
@@ -47,14 +47,14 @@
         }
       ],
       "icon": "icon-512.ico",
-      "artifactName": "TEX FOR EVER Setup.${version}.${ext}"
+      "artifactName": "TEXFOREVER Setup.${version}.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "TEX FOR EVER",
+      "shortcutName": "TEXFOREVER",
       "deleteAppDataOnUninstall": false
     }
   },
