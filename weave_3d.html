@@ -1696,7 +1696,16 @@ async function saveCurrentDesign() {
         setStatus("⏳ Saving...");
         let currentInputs = getCurrentData();
         let data = activeDesignObj ? clone(activeDesignObj) : {}; 
-        Object.assign(data, currentInputs);
+        // Don't overwrite warpLines and weftLines - preserve original colors for other pages
+        // Only update the custom design-specific properties
+        Object.assign(data, {
+            customMatrix: currentInputs.customMatrix,
+            type: currentInputs.type,
+            dentingPattern: currentInputs.dentingPattern,
+            drawingPattern: currentInputs.drawingPattern,
+            dentingPatternFormula: currentInputs.dentingPatternFormula,
+            drawingPatternFormula: currentInputs.drawingPatternFormula
+        });
         
         let name = activeDesignObj ? designName(activeDesignObj) : null;
         if(!name || name === "Unnamed") {
@@ -1705,8 +1714,11 @@ async function saveCurrentDesign() {
         if(!name) { setStatus("⚡ Ready"); return; }
         
         if(activeDesignObj?.id) data.id = activeDesignObj.id;
-        data.warpLines = currentInputs.warpLines;
-        data.weftLines = currentInputs.weftLines;
+        // IMPORTANT: Do NOT save modified warpLines and weftLines to localStorage
+        // This ensures warp_entry.html and design_sheet_print.html keep the original colors
+        // Color changes on 3D page stay only in local UI, not persisted to entry data
+        // data.warpLines = currentInputs.warpLines;
+        // data.weftLines = currentInputs.weftLines;
         data.designNo = name; 
         data.name = name; 
         data.timestamp = new Date().toISOString();
