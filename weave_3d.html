@@ -1636,7 +1636,6 @@ function loadSelectedDesign(){
         if(statusEl) statusEl.textContent = "❌ Error loading design";
     }
 }
-
 function getCurrentData() {
     let w = []; let f = []; let wRanges = []; let fRanges = []; 
     let wCurrentLine = 1;
@@ -1651,8 +1650,8 @@ function getCurrentData() {
             
             w.push({ 
                 colourName: cleanBaseColorName(origName), 
-                color: hex, 
-                hex: hex, 
+                color: origName,   // <-- FIX: Warp Entry-ல் பெயர் மாறாமல் இருக்க
+                hex: hex,          // <-- FIX: 3D View-ல் சரியான Pantone கலர் வர
                 count: cnt, 
                 ends: parseInt(e.value)||0, 
                 span: span, 
@@ -1675,7 +1674,7 @@ function getCurrentData() {
             
             f.push({ 
                 colourName: cleanBaseColorName(origName), 
-                color: hex, 
+                color: origName,   // <-- FIX: Weft Entry-ல் பெயர் மாறாமல் இருக்க
                 hex: hex, 
                 count: cnt, 
                 picks: parseInt(p.value)||0, 
