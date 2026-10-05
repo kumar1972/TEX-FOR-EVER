@@ -3493,6 +3493,85 @@ function buildWarpTable(lines) {
                     
                     if (repeats >= 2) {
                         assignedDraw = `(${shiftedBase.join(",")})&times;${repeats}`;
+function buildWarpTable(lines) {
+    if(!lines || !lines.length) return "<div style='font-size:8px;text-align:center;padding:5px;border:1px solid #ccc;'>No Yarns</div>";
+    
+    let expandedGroups = [];
+    let ranges = activeDesignObj?.warpRanges || [];
+    let i = 0;
+    
+    while(i < lines.length) {
+        let lineNum = i + 1;
+        let range = ranges.find(r => Number(r.start) === lineNum);
+        if(range && Number(range.end) >= Number(range.start) && Number(range.set) > 1) {
+            let setRows = [];
+            let span = Number(range.end) - Number(range.start) + 1;
+            for(let j = 0; j < span && (i+j) < lines.length; j++) {
+                setRows.push(lines[i+j]);
+            }
+            expandedGroups.push({
+                isSet: true,
+                setStart: range.start,
+                setEnd: range.end,
+                totalRepeats: range.set,
+                rows: setRows
+            });
+            i += span;
+        } else {
+            expandedGroups.push({
+                isSet: false,
+                row: lines[i]
+            });
+            i++;
+        }
+    }
+
+    let h = `<table class="yarn-table">
+        <thead>
+            <tr>
+                <th width="6%">#</th>
+                <th width="8%">Col</th>
+                <th width="42%" style="text-align:left;">Colour Name</th>
+                <th width="14%">Ends</th>
+                <th width="12%">Set</th>
+                <th width="18%">Drawing</th>
+            </tr>
+        </thead>
+        <tbody>`;
+    
+    let visualRowIdx = 1;
+
+    let rawDraw = document.getElementById("drawingPatternInput")?.value || activeDesignObj?.drawingPatternFormula || activeDesignObj?.drawingPattern || "1,2,3,4";
+    let drawArr = expandPattern(rawDraw);
+    if (!drawArr || drawArr.length === 0) drawArr = [1,2,3,4];
+    let L = drawArr.length;
+    let globalThreadIndex = 0;
+
+    expandedGroups.forEach((item, idx) => {
+        if(item.isSet) {
+            let totalRep = item.totalRepeats;
+            let spanLen = item.rows.length;
+            let setTotalEnds = 0;
+
+            item.rows.forEach((l, sIdx) => {
+                let rawCol = l.colourName || l.origName || "";
+                let pureColorName = cleanBaseColorName(rawCol);
+                let cleanName = getLocalizedColorName(pureColorName) || pureColorName || "Custom";
+                
+                let amt = parseInt(l.ends) || 0;
+                setTotalEnds += amt;
+                let assignedDraw = "-";
+                
+                if (amt > 0) {
+                    let shiftedBase = [];
+                    for(let k=0; k<L; k++) shiftedBase.push(drawArr[(globalThreadIndex + k) % L]);
+                    let repeats = Math.floor(amt / L);
+                    let remainder = amt % L;
+                    let remArr = [];
+                    for(let k=0; k<remainder; k++) remArr.push(drawArr[(globalThreadIndex + repeats * L + k) % L]);
+                    
+                    if (repeats >= 2) {
+                        assignedDraw = `(${shiftedBase.join(",")})×${repeats}`;
                         if (remainder > 0) assignedDraw += "," + remArr.join(",");
                     } else {
                         let seq = [];
@@ -3507,7 +3586,7 @@ function buildWarpTable(lines) {
                     setTd = `<td rowspan="${spanLen}" style="font-size:10px; font-weight:900; color:#b91c1c; background:#fff5f5; vertical-align:middle; text-align:center; padding:2px;">
                         <div style="display:flex; align-items:center; justify-content:center; gap:4px;">
                             <div style="font-size:22px; font-weight:300;">}</div>
-                            <div style="font-size:10px;">&times; ${totalRep}</div>
+                            <div style="font-size:10px;">× ${totalRep}</div>
                         </div>
                     </td>`;
                 }
@@ -3524,7 +3603,6 @@ function buildWarpTable(lines) {
                 </tr>`;
             });
             
-            // Set repeat aagumbothu thread index-ai thodarndhu calculate seiyya
             if (totalRep > 1 && setTotalEnds > 0) {
                 let remainingEnds = (totalRep - 1) * setTotalEnds;
                 globalThreadIndex = (globalThreadIndex + remainingEnds) % L;
@@ -3548,7 +3626,7 @@ function buildWarpTable(lines) {
                 for(let k=0; k<remainder; k++) remArr.push(drawArr[(globalThreadIndex + repeats * L + k) % L]);
                 
                 if (repeats >= 2) {
-                    assignedDraw = `(${shiftedBase.join(",")})&times;${repeats}`;
+                    assignedDraw = `(${shiftedBase.join(",")})×${repeats}`;
                     if (remainder > 0) assignedDraw += "," + remArr.join(",");
                 } else {
                     let seq = [];
@@ -3568,7 +3646,6 @@ function buildWarpTable(lines) {
             </tr>`;
         }
     });
-
 
     h += `</tbody></table>`;
     return h;
