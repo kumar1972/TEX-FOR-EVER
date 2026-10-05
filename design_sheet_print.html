@@ -2099,7 +2099,7 @@ function renderSplitPreviewTable(
         }
 
     }
-    else{
+        else{
 
         let weftWidth =
             parseFloat(
@@ -2112,8 +2112,8 @@ function renderSplitPreviewTable(
                 : 67.44
             );
 
-        // Use actual calculated picks from weft data, not onloomPick
-        let pickNum = calculatedPatternValue;
+        // Change to use onloomPick instead of calculatedPatternValue
+        let pickNum = parseFloat(onloomPick) || 0;
 
         finalGrandTotal =
             weftWidth * pickNum;
@@ -2127,7 +2127,7 @@ function renderSplitPreviewTable(
 
     let summaryHtml = "";
 
-    if(type === "weft"){
+        if(type === "weft"){
 
         let storedWidthVal =
             parseFloat(
@@ -2140,8 +2140,8 @@ function renderSplitPreviewTable(
                 : 67.44
             );
 
-        // Use actual calculated picks from data, not onloomPick
-        let pickNum = calculatedPatternValue;
+        // Change to use onloomPick instead of calculatedPatternValue
+        let pickNum = parseFloat(onloomPick) || 0;
         let weftTotal = storedWidthVal * pickNum;
 
         summaryHtml += `
@@ -2151,6 +2151,7 @@ function renderSplitPreviewTable(
         `;
 
     }
+
     else{
 
         let calculatedPatternEnds = totalMultiplierSum + remainderSum;
