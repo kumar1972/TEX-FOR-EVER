@@ -1,4 +1,4 @@
-async function selectTexfriendFolder() {
+async function selectTexforeverFolder() {
 
     try {
 
@@ -26,17 +26,17 @@ async function selectTexfriendFolder() {
             }
 
             localStorage.setItem(
-                "texfriend_selected_folder",
+                "texforever_selected_folder",
                 result.name || "Selected Folder"
             );
 
             localStorage.setItem(
-                "texfriend_selected_folder_uri",
+                "texforever_selected_folder_uri",
                 result.uri
             );
 
             localStorage.setItem(
-                "texfriend_save_mode",
+                "texforever_save_mode",
                 "android_folder"
             );
 
@@ -63,12 +63,12 @@ if (
     }
 
     localStorage.setItem(
-        "texfriend_selected_folder",
+        "texforever_selected_folder",
         result.folder
     );
 
     localStorage.setItem(
-        "texfriend_save_mode",
+        "texforever_save_mode",
         "electron_folder"
     );
 
@@ -93,12 +93,12 @@ if (
         const handle = await window.showDirectoryPicker();
 
         localStorage.setItem(
-            "texfriend_selected_folder",
+            "texforever_selected_folder",
             handle.name
         );
 
         localStorage.setItem(
-            "texfriend_save_mode",
+            "texforever_save_mode",
             "desktop_folder"
         );
 

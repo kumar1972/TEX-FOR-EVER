@@ -315,7 +315,7 @@ input[type=file]::file-selector-button{
 <!-- SYSTEM ACTIONS -->
 <div class="exit-section">
     <button type="button" id="saveAllButton" class="btn-action btn-success" style="width:100%;font-size:13px;padding:14px" onclick="executeSaveAll()">💾 SAVE ALL SETTINGS & EXIT</button>
-    <button type="button" class="btn-action btn-success" style="width:100%;" onclick="selectTexfriendFolder()">📁 SELECT FOLDER</button>
+    <button type="button" class="btn-action btn-success" style="width:100%;" onclick="selectTexforeverFolder()">📁 SELECT FOLDER</button>
     <button type="button" class="btn-action btn-info" style="width:100%" onclick="exitToDashboard()">🏠 EXIT TO DASHBOARD</button>
     <button type="button" class="btn-action btn-info" style="width:100%" onclick="backupAllData()">📥 BACKUP ERP DATA (JSON)</button>
     <button type="button" class="btn-action btn-success" style="width:100%" onclick="backupAllDataAsExcel()">📊 BACKUP ERP DATA AS EXCEL (CSV)</button>
@@ -331,7 +331,7 @@ input[type=file]::file-selector-button{
 "use strict";
 
 /* ============================================================
-   TEXFRIEND FOREVER SETTINGS
+   TEX FOR EVER SETTINGS
 ============================================================ */
 
 let tempLogoData = "";
@@ -348,7 +348,7 @@ const DESIGN_MAX_HEIGHT = 800;
 const MAX_IMAGE_BYTES = 350 * 1024;
 
 /* INDEXEDDB HELPER */
-const DB_NAME = "TexFriendProDB";
+const DB_NAME = "TexForEverDB";
 const STORE_NAME = "erp_store";
 const DB_VERSION = 1;
 
@@ -1277,7 +1277,7 @@ async function executeSaveAll() {
             }
 
             const results = await Promise.allSettled(cloudJobs);
-            console.log("TEXFRIEND FOREVER cloud sync completed:", results);
+            console.log("TEX FOR EVER cloud sync completed:", results);
         }
 
         saveProgress("✅ Saved. Opening Dashboard...");
@@ -1336,7 +1336,7 @@ async function backupAllData() {
         }
 
         const payload = {
-            app: "TEXFRIEND FOREVER",
+            app: "TEX FOR EVER",
             version: "Settings Backup with IndexedDB",
             createdAt: new Date().toISOString(),
             data: allData
@@ -1344,17 +1344,17 @@ async function backupAllData() {
 
         const jsonContent = JSON.stringify(payload, null, 2);
 
-        const fileName = "texfriend_erp_backup_" + new Date().toISOString().slice(0, 10) + ".json";
+        const fileName = "texforever_erp_backup_" + new Date().toISOString().slice(0, 10) + ".json";
 
         /* ANDROID NATIVE BACKUP */
         if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.TexforeverStorage) {
 
-            const folderUri = localStorage.getItem("texfriend_selected_folder_uri");
+            const folderUri = localStorage.getItem("texforever_selected_folder_uri");
 
             if (!folderUri) {
                 alert("Please select backup folder first!");
-                if (typeof selectTexfriendFolder === "function") {
-                    await selectTexfriendFolder();
+                if (typeof selectTexforeverFolder === "function") {
+                    await selectTexforeverFolder();
                 }
                 return;
             }
@@ -1425,17 +1425,17 @@ async function backupAllDataAsExcel() {
             csvContent += '"' + String(key).replace(/"/g, '""') + '","' + value + '"\r\n';
         }
 
-        const fileName = "texfriend_erp_backup_" + new Date().toISOString().slice(0, 10) + ".csv";
+        const fileName = "texforever_erp_backup_" + new Date().toISOString().slice(0, 10) + ".csv";
 
         /* ANDROID NATIVE BACKUP */
         if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.TexforeverStorage) {
 
-            const folderUri = localStorage.getItem("texfriend_selected_folder_uri");
+            const folderUri = localStorage.getItem("texforever_selected_folder_uri");
 
             if (!folderUri) {
                 toast("Please select backup folder first!", false);
-                if (typeof selectTexfriendFolder === "function") {
-                    selectTexfriendFolder();
+                if (typeof selecttecforeverFolder === "function") {
+                    selectTexforeverFolder();
                 }
                 return;
             }
@@ -1584,13 +1584,13 @@ async function initialiseSettings() {
     }
 
     /* HEADING */
-    const heading = safeLoad("app_heading_name", "TEXFRIEND FOREVER");
+    const heading = safeLoad("app_heading_name", "TEX FOR EVER");
     if ($("set_heading")) {
         $("set_heading").value = cleanInputText(heading);
     }
 
     /* ADDRESS */
-    const address = safeLoad("company_full_address", "TEXFRIEND FOREVER ,Salem, Tamil Nadu.");
+    const address = safeLoad("company_full_address", "TEX FOR EVER ,Salem, Tamil Nadu.");
     if ($("set_comp_addr")) {
         $("set_comp_addr").value = String(address || "").replace(/\\n/g, "\n");
     }

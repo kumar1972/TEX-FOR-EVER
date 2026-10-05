@@ -1,5 +1,5 @@
 // ============================================================
-// TEXFRIEND FOREVER 
+// TEX FOR EVER 
 // sw.js
 // PWA + OFFLINE ALL PAGES + LOCAL-FIRST + CLOUD READY
 // ============================================================
@@ -10,7 +10,7 @@
 // ✅ Online Network First
 // ✅ Offline Cache Fallback
 // ✅ Supabase API NOT cached
-// ✅ Old TEXFRIEND FOREVER caches cleaned
+// ✅ Old TEX FOR EVER caches cleaned
 // ✅ Service Worker update support
 // ============================================================
 
@@ -20,8 +20,8 @@
 // VERSION (Updated to v10 so Chrome detects changes)
 // ============================================================
 const CACHE_VERSION = "v10"; 
-const CACHE_NAME = "texfriend-erp-" + CACHE_VERSION;
-const APP_SHELL_CACHE = "texfriend-shell-" + CACHE_VERSION;
+const CACHE_NAME = "texforever-erp-" + CACHE_VERSION;
+const APP_SHELL_CACHE = "texforever-shell-" + CACHE_VERSION;
 
 // ============================================================
 // ALL ERP FILES
@@ -95,7 +95,7 @@ self.addEventListener(
     event => {
 
         console.log(
-            "📦 TEXFRIEND FOREVER SW installing:",
+            "📦 TEX FOR EVER SW installing:",
             CACHE_NAME
         );
 
@@ -154,7 +154,7 @@ self.addEventListener(
             .then(
                 () => {
                     console.log(
-                        "✅ TEXFRIEND FOREVER pages cached"
+                        "✅ TEX FOR EVER pages cached"
                     );
                     return self.skipWaiting();
                 }
@@ -181,7 +181,7 @@ self.addEventListener(
     event => {
 
         console.log(
-            "⚡ TEXFRIEND FOREVER SW activated:",
+            "⚡ TEX FOR EVER SW activated:",
             CACHE_NAME
         );
 
@@ -194,7 +194,7 @@ self.addEventListener(
                             cacheName => {
                                 if (
                                     cacheName.startsWith(
-                                        "texfriend-"
+                                        "texforever-"
                                     ) &&
                                     cacheName !==
                                         CACHE_NAME &&
@@ -320,7 +320,7 @@ async function handleNavigation(
 
     // 🔴 Fixed the Syntax Error here (Added closing brace '}' for the function)
     return new Response(
-        "TEXFRIEND FOREVER: இந்தப் பக்கம் இன்னும் ஆஃப்லைனில் பதிவிறக்கம் செய்யப்படவில்லை. தயவுசெய்து இன்டர்நெட்டை ஆன் செய்து இந்தப் பக்கத்தை ஒருமுறை பார்வையிடவும்.",
+        "TEX FOR EVER: இந்தப் பக்கம் இன்னும் ஆஃப்லைனில் பதிவிறக்கம் செய்யப்படவில்லை. தயவுசெய்து இன்டர்நெட்டை ஆன் செய்து இந்தப் பக்கத்தை ஒருமுறை பார்வையிடவும்.",
         {
             status: 503,
             headers: {
@@ -379,7 +379,7 @@ async function handleStaticRequest(
         }
 
         return new Response(
-            "TEXFRIEND FOREVER offline.\n\n" +
+            "TEX FOR EVER offline.\n\n" +
             "This resource is not cached.",
             {
                 status: 503,
@@ -474,14 +474,14 @@ self.addEventListener(
             "SKIP_WAITING"
         ) {
             console.log(
-                "🔄 TEXFRIEND: Force update"
+                "🔄 TEXFOREVER: Force update"
             );
             self.skipWaiting();
         }
 
         if (
             event.data.type ===
-            "CLEAR_TEXFRIEND_CACHE"
+            "CLEAR_TEXFOREVER_CACHE"
         ) {
             event.waitUntil(
                 caches.keys()
@@ -492,7 +492,7 @@ self.addEventListener(
                                 .filter(
                                     name =>
                                         name.startsWith(
-                                            "texfriend-"
+                                            "texforever-"
                                         )
                                 )
                                 .map(
@@ -507,7 +507,7 @@ self.addEventListener(
                 .then(
                     () => {
                         console.log(
-                            "🧹 TEXFRIEND FOREVER caches cleared"
+                            "🧹 TEX FOR EVER caches cleared"
                         );
                     }
                 )
@@ -525,7 +525,7 @@ self.addEventListener(
     "error",
     event => {
         console.error(
-            "❌ TEXFRIEND FOREVER SW Error:",
+            "❌ TEX FOR EVER SW Error:",
             event.error
         );
     }
@@ -540,7 +540,7 @@ self.addEventListener(
     "unhandledrejection",
     event => {
         console.error(
-            "❌ TEXFRIEND FOREVER SW Promise Error:",
+            "❌ TEX FOR EVER SW Promise Error:",
             event.reason
         );
     }
@@ -552,6 +552,6 @@ self.addEventListener(
 // ============================================================
 
 console.log(
-    "🚀 TEXFRIEND FOREVER Service Worker Ready:",
+    "🚀 TEX FOR EVER Service Worker Ready:",
     CACHE_NAME
 );

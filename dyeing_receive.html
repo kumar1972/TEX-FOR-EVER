@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Dyeing Receive - TEXFRIEND FOREVER</title>
+<title>Dyeing Receive - TEX FOR EVER</title>
 <script src="config.js"></script>
 <script src="translator.js"></script>
 <style>
@@ -312,7 +312,7 @@ foot.innerHTML=`<tr><td colspan="5" style="text-align:right">Grand Total:</td><t
 function buildPreview(){
 let r=getFilteredRecords(),d=document.getElementById('designNumber').value||'All Designs',date=document.getElementById('receiveDate').value||'';
 let rows='',ti=0,tr=0,tl=0,te=0;r.slice().reverse().forEach(x=>{let i=parseFloat(x.issuedWt)||0,q=parseFloat(x.receivedWt)||0,l=parseFloat(x.lossWt)||0,e=x.excessWt&&x.excessWt!=='-'?parseFloat(x.excessWt)||0:0;ti+=i;tr+=q;tl+=l;te+=e;rows+=`<tr><td>${formatDate(x.date)}</td><td>${safeText(x.designNo)}</td><td>${safeText(x.count)}</td><td>${safeText(x.color)}</td><td>${safeText(x.unit||'-')}</td><td>${i.toFixed(3)}</td><td>${q.toFixed(3)}</td><td>${l.toFixed(3)}</td><td>${safeText(x.lossPerc)}</td><td>${e?e.toFixed(3):'-'}</td><td>${safeText(x.status||'running')}</td></tr>`});
-document.getElementById('previewContent').innerHTML=`<div class="preview-title">DYEING COLOUR RECEIVED</div><div class="preview-subtitle">TEXFRIEND FOREVER</div><div class="preview-info"><div><b>Design:</b> ${safeText(d)}</div><div><b>Report Date:</b> ${formatDate(date)}</div><div><b>Records:</b> ${r.length}</div></div><table><thead><tr><th>Date</th><th>Design</th><th>Count</th><th>Colour</th><th>Dyeing Unit</th><th>Issued</th><th>Received</th><th>Loss</th><th>Loss %</th><th>Excess</th><th>Status</th></tr></thead><tbody>${rows||'<tr><td colspan="11">No records</td></tr>'}</tbody><tfoot><tr><td colspan="5" style="text-align:right"><b>Grand Total</b></td><td><b>${ti.toFixed(3)}</b></td><td><b>${tr.toFixed(3)}</b></td><td><b>${tl.toFixed(3)}</b></td><td>-</td><td><b>${te?te.toFixed(3):'-'}</b></td><td></td></tr></tfoot></table><div class="preview-total">Printed from TEXFRIEND ERP</div>`
+document.getElementById('previewContent').innerHTML=`<div class="preview-title">DYEING COLOUR RECEIVED</div><div class="preview-subtitle">TEX FOR EVER</div><div class="preview-info"><div><b>Design:</b> ${safeText(d)}</div><div><b>Report Date:</b> ${formatDate(date)}</div><div><b>Records:</b> ${r.length}</div></div><table><thead><tr><th>Date</th><th>Design</th><th>Count</th><th>Colour</th><th>Dyeing Unit</th><th>Issued</th><th>Received</th><th>Loss</th><th>Loss %</th><th>Excess</th><th>Status</th></tr></thead><tbody>${rows||'<tr><td colspan="11">No records</td></tr>'}</tbody><tfoot><tr><td colspan="5" style="text-align:right"><b>Grand Total</b></td><td><b>${ti.toFixed(3)}</b></td><td><b>${tr.toFixed(3)}</b></td><td><b>${tl.toFixed(3)}</b></td><td>-</td><td><b>${te?te.toFixed(3):'-'}</b></td><td></td></tr></tfoot></table><div class="preview-total">Printed from TEXFOREVER</div>`
 }
 function openPreview(printNow=false){buildPreview();openModal('printPreviewModal');if(printNow)setTimeout(printPreview,350)}
 function printPreview(){buildPreview();window.print()}

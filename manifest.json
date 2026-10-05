@@ -1,7 +1,7 @@
 {
-    "name": "TEXFRIEND FOREVER",
-    "short_name": "TEXFRIEND",
-    "description": "TEXFRIEND FOREVER - Offline + Cloud Sync",
+    "name": "TEX FOR EVER",
+    "short_name": "TEX FOR EVER",
+    "description": "TEX FOR EVER - Offline + Cloud Sync",
     "id": "/",
     "start_url": "./index.html",
     "scope": "./",

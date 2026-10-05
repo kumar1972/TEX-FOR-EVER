@@ -1,5 +1,5 @@
 // ============================================================
-// TEXFRIEND ERP
+// TEX FOR EVER 
 // config.js
 // SUPABASE CLOUD SYNC
 // LOCAL-FIRST + CLOUD SYNC
@@ -36,7 +36,7 @@ window.StorageDB = {
     isReady: false,
     async init() {
         return new Promise((resolve) => {
-            const req = indexedDB.open("TexfriendStorageDB", 1);
+            const req = indexedDB.open("TexforeverStorageDB", 1);
             req.onupgradeneeded = (e) => {
                 e.target.result.createObjectStore("store");
             };
@@ -132,7 +132,7 @@ window.StorageDB.init();
 
 window.isDemo = false;
 
-window.TEXFRIEND_CLOUD = {
+window.TEXFOREVER_CLOUD = {
     ENABLED: true,
     FIRESTORE: false,
     AUTH: false,
@@ -161,7 +161,7 @@ function readSupabaseStoredValue(key) {
     }
 }
 
-window.TEXFRIEND_SUPABASE_CONFIG = {
+window.TEXFOREVER_SUPABASE_CONFIG = {
     url: readSupabaseStoredValue("custom_supabase_url"),
     key: readSupabaseStoredValue("custom_supabase_key")
 };
@@ -299,14 +299,14 @@ window.erpCloudKeys = [
 // ============================================================
 // CLOUD ROOT
 // ============================================================
-window.TEXFRIEND_CLOUD_ROOT = "texfriendERP";
+window.TEXFOREVER_CLOUD_ROOT = "texforever";
 
 // ============================================================
 // DIRTY TRACKING (Powered by StorageDB)
 // ============================================================
 
-function getDirtyKey(key) { return ("__texfriend_dirty__" + key); }
-function getTimeKey(key) { return ("__texfriend_local_time__" + key); }
+function getDirtyKey(key) { return ("__texforever_dirty__" + key); }
+function getTimeKey(key) { return ("__texforever_local_time__" + key); }
 
 function markLocalDirty(key) {
     try {
@@ -348,8 +348,8 @@ function queueOfflineData(key, data) {
     try {
         window.offlineSyncQueue[key] = data;
         const val = JSON.stringify(window.offlineSyncQueue);
-        if (window.StorageDB) { window.StorageDB.setItem("__texfriend_offline_queue__", val); } 
-        else { localStorage.setItem("__texfriend_offline_queue__", val); }
+        if (window.StorageDB) { window.StorageDB.setItem("__texforever_offline_queue__", val); } 
+        else { localStorage.setItem("__texforever_offline_queue__", val); }
     } catch (error) {
         console.error("Offline Queue Error:", error);
     }
@@ -357,7 +357,7 @@ function queueOfflineData(key, data) {
 
 function loadOfflineQueue() {
     try {
-        const raw = window.StorageDB ? window.StorageDB.getItem("__texfriend_offline_queue__") : localStorage.getItem("__texfriend_offline_queue__");
+        const raw = window.StorageDB ? window.StorageDB.getItem("__texforever_offline_queue__") : localStorage.getItem("__texforever_offline_queue__");
         if (!raw) { window.offlineSyncQueue = {}; return; }
         window.offlineSyncQueue = JSON.parse(raw) || {};
     } catch (error) {
@@ -369,8 +369,8 @@ function removeQueueItem(key) {
     try {
         delete window.offlineSyncQueue[key];
         const val = JSON.stringify(window.offlineSyncQueue);
-        if (window.StorageDB) { window.StorageDB.setItem("__texfriend_offline_queue__", val); } 
-        else { localStorage.setItem("__texfriend_offline_queue__", val); }
+        if (window.StorageDB) { window.StorageDB.setItem("__texforever_offline_queue__", val); } 
+        else { localStorage.setItem("__texforever_offline_queue__", val); }
     } catch (error) {}
 }
 
@@ -443,12 +443,12 @@ function updateNetworkStatus() {
     }
 
     try {
-        const old = document.getElementById("texfriend-network-status");
+        const old = document.getElementById("texforever-network-status");
         if (old && old.parentNode) { old.parentNode.removeChild(old); }
     } catch (e) {}
 
     const bar = document.createElement("div");
-    bar.id = "texfriend-network-status";
+    bar.id = "texforever-network-status";
 
     if (!window.isCloudSyncActive()) {
         bar.innerHTML = "📴 OFFLINE MODE — Cloud Sync Disabled in Settings";
@@ -483,7 +483,7 @@ function updateNetworkStatus() {
 
     window._networkStatusTimer = setTimeout(function () {
         try {
-            const el = document.getElementById("texfriend-network-status");
+            const el = document.getElementById("texforever-network-status");
             if (el && el.parentNode) { el.parentNode.removeChild(el); }
         } catch(e) {}
         window._networkStatusTimer = null;
@@ -539,7 +539,7 @@ window.initializeSupabase = async function (doFullSync) {
 
     window.cloudSyncPromise = (async function () {
         try {
-            if (!window.TEXFRIEND_SUPABASE_CONFIG.url || !window.TEXFRIEND_SUPABASE_CONFIG.key) {
+            if (!window.TEXFOREVER_SUPABASE_CONFIG.url || !window.TEXFOREVER_SUPABASE_CONFIG.key) {
                 console.log("ℹ️ Supabase URL/Key not set yet. Skipping cloud sync (offline/local mode).");
                 window.supabaseConnected = false;
                 window.cloudSyncReady = false;
@@ -555,8 +555,8 @@ window.initializeSupabase = async function (doFullSync) {
             }
 
             window.supabaseClient = supabase.createClient(
-                window.TEXFRIEND_SUPABASE_CONFIG.url,
-                window.TEXFRIEND_SUPABASE_CONFIG.key
+                window.TEXFOREVER_SUPABASE_CONFIG.url,
+                window.TEXFOREVER_SUPABASE_CONFIG.key
             );
 
             window.supabaseConnected = true;
@@ -570,7 +570,7 @@ window.initializeSupabase = async function (doFullSync) {
                 await syncOfflineQueue();
             }
 
-            console.log("✅ TEXFRIEND Supabase Cloud initialized");
+            console.log("✅ TEX FOR EVER Supabase Cloud initialized");
             return true;
 
         } catch (error) {
@@ -884,7 +884,7 @@ window.waitForCloudSync = async function (timeout = 15000) {
 window.factoryResetCloud = async function () {
     const confirmed = window.confirm(
         "⚠️ FACTORY RESET\n\n" +
-        "இந்த device-ல் உள்ள TEXFRIEND ERP data அனைத்தும் அழிக்கப்படும்.\n\n" +
+        "இந்த device-ல் உள்ள TEX FOR EVER data அனைத்தும் அழிக்கப்படும்.\n\n" +
         "Continue செய்ய OK அழுத்தவும்."
     );
 
@@ -1292,9 +1292,9 @@ window.addEventListener("DOMContentLoaded", function () {
 // ============================================================
 
 document.addEventListener("DOMContentLoaded", function () {
-    if (document.getElementById("texfriend-display-controller")) { return; }
+    if (document.getElementById("texforever-display-controller")) { return; }
 
-    let currentZoom = parseFloat(localStorage.getItem("texfriend_zoom_level")) || 1.0;
+    let currentZoom = parseFloat(localStorage.getItem("texforever_zoom_level")) || 1.0;
 
     function applyZoom(val) {
         document.body.style.zoom = val;
@@ -1303,16 +1303,16 @@ document.addEventListener("DOMContentLoaded", function () {
             document.body.style.transformOrigin = "top left";
             document.body.style.width = `${100 / val}%`;
         }
-        localStorage.setItem("texfriend_zoom_level", val);
+        localStorage.setItem("texforever_zoom_level", val);
     }
 
     applyZoom(currentZoom);
 
-    let savedTop = localStorage.getItem("texfriend_zoom_top") || "15px";
-    let savedLeft = localStorage.getItem("texfriend_zoom_left") || (window.innerWidth - 65) + "px";
+    let savedTop = localStorage.getItem("texforever_zoom_top") || "15px";
+    let savedLeft = localStorage.getItem("texforever_zoom_left") || (window.innerWidth - 65) + "px";
 
     const controllerDiv = document.createElement("div");
-    controllerDiv.id = "texfriend-display-controller";
+    controllerDiv.id = "texforever-display-controller";
     controllerDiv.style.position = "fixed";
     controllerDiv.style.top = savedTop;
     controllerDiv.style.left = savedLeft;
@@ -1360,8 +1360,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     btnToggle.addEventListener("touchend", function () {
         if (didMove) {
-            localStorage.setItem("texfriend_zoom_top", controllerDiv.style.top);
-            localStorage.setItem("texfriend_zoom_left", controllerDiv.style.left);
+            localStorage.setItem("texforever_zoom_top", controllerDiv.style.top);
+            localStorage.setItem("texforever_zoom_left", controllerDiv.style.left);
         }
     });
 
@@ -1385,8 +1385,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         function onMouseUp() {
             if (didMove) {
-                localStorage.setItem("texfriend_zoom_top", controllerDiv.style.top);
-                localStorage.setItem("texfriend_zoom_left", controllerDiv.style.left);
+                localStorage.setItem("texforever_zoom_top", controllerDiv.style.top);
+                localStorage.setItem("texforever_zoom_left", controllerDiv.style.left);
             }
             document.removeEventListener("mousemove", onMouseMove);
             document.removeEventListener("mouseup", onMouseUp);
@@ -1446,7 +1446,7 @@ setTimeout(function () {
 // ============================================================
 
 console.log("================================================");
-console.log("✅ TEXFRIEND config.js loaded");
+console.log("✅ TEX FOR EVER config.js loaded");
 console.log("☁️ MODE: LOCAL-FIRST + SUPABASE");
 console.log("☁️ Supabase: " + (window.isCloudSyncActive() ? "ENABLED" : "DISABLED (OFFLINE)"));
 console.log("💾 LocalStorage: ENABLED (Backed by IndexedDB)");
