@@ -1849,10 +1849,10 @@ function renderSplitPreviewTable(
                     <td
                         rowspan="${spanRows}"
                         class="col-set"
-                        style="vertical-align:middle;">
-                        <div style="display:flex; align-items:center; justify-content:center;">
-                            <span style="font-size:32px; font-weight:300; margin-right:4px; line-height:0.7; padding-bottom:2px;">}</span>
-                            <div style="display:flex; flex-direction:column; text-align:left; line-height:1.1; font-size:inherit;">
+                        style="vertical-align:middle; text-align:center;">
+                        <div style="display:flex; align-items:center; justify-content:center; height:100%;">
+                            <span style="font-size:28px; font-weight:300; margin-right:2px; line-height:1.0; padding-top:0px; text-align:right; min-width:20px;">}</span>
+                            <div style="display:flex; flex-direction:column; text-align:left; line-height:1.2; font-size:0.9rem;">
                                 <b>X ${rInfo.set}</b>
                                 <b>= ${totalProduct}</b>
                             </div>
@@ -2114,11 +2114,8 @@ function renderSplitPreviewTable(
                 : 67.44
             );
 
-
-        let pickNum =
-            parseFloat(onloomPick) ||
-            60;
-
+        // Use actual calculated picks from weft data, not onloomPick
+        let pickNum = calculatedPatternValue;
 
         finalGrandTotal =
             weftWidth * pickNum;
@@ -2145,14 +2142,13 @@ function renderSplitPreviewTable(
                 : 67.44
             );
 
-
-        let pickNum =
-            parseFloat(onloomPick) ||
-            60;
+        // Use actual calculated picks from data, not onloomPick
+        let pickNum = calculatedPatternValue;
+        let weftTotal = storedWidthVal * pickNum;
 
         summaryHtml += `
             <div>
-                Weft Width ${storedWidthVal} X Pick ${pickNum} = <b>${finalGrandTotal.toFixed(2)} Total Pick</b>
+                Weft Width ${storedWidthVal} X Pick ${pickNum} = <b>${weftTotal.toFixed(2)} Total Pick</b>
             </div>
         `;
 
