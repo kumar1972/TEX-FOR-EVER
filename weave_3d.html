@@ -763,7 +763,11 @@ let colourPopupTarget = { type: null, index: null };
 let liveDesignDimensions = { widthCm: 0, heightCm: 0 };
 let selectedCadScalePercent = 100;
 
-let rulerCalibrationMultiplier = parseFloat(localStorage.getItem("weave_ruler_cal") || "1.0");
+let rulerCalibrationMultiplier = 1.0;
+try {
+    rulerCalibrationMultiplier = parseFloat(localStorage.getItem("weave_ruler_cal") || "1.0");
+} catch(e) {}
+if (!isFinite(rulerCalibrationMultiplier)) rulerCalibrationMultiplier = 1.0;
 
 function adjustRulerDpi(delta) {
     rulerCalibrationMultiplier = Math.max(0.7, Math.min(1.5, rulerCalibrationMultiplier + delta));
@@ -1210,8 +1214,10 @@ function renderUIWithData(w=[], f=[]) {
         let validW = w.filter(line => (line && (Number(line.ends) > 0 || Number(line.amount) > 0 || line.color || line.colourName)));
         let validF = f.filter(line => (line && (Number(line.picks) > 0 || Number(line.amount) > 0 || line.color || line.colourName)));
         
-        let wc = validW.length > 0 ? validW.length : w.length;
-        let fc = validF.length > 0 ? validF.length : f.length;
+        // Keep the original row positions/counts. Filtering here can shift W2/W3
+        // into W1/W2 when an earlier row is temporarily empty.
+        let wc = w.length;
+        let fc = f.length;
 
         currentWarpCount = wc; currentWeftCount = fc;
         if($("warpCountDisplay")) $("warpCountDisplay").textContent = wc; 
@@ -1880,6 +1886,10 @@ function isSeersuckerThread(colHex, origName, countVal){
 
 function getSimulationPicks(mRows, str){
     let seq = [];
+    // Some source modules may store pickPattern as an array. Normalize it
+    // before getPrintBracketMap() performs string operations.
+    if (Array.isArray(str)) str = str.join(",");
+    if (str == null) str = "";
     let rowB = getPrintBracketMap(str, false);
     let hasBrackets = Object.keys(rowB.map).length > 0;
     if(!hasBrackets){
@@ -2627,8 +2637,8 @@ function renderPopupTabs() {
 function openColourPopup(masterName, shadeIndex, targetType=null, targetIndex=null) {
     const masterIndex = texforeverColourMaster.findIndex(x=>x.name.toLowerCase()===masterName.toLowerCase()); 
     if(masterIndex >= 0) activeColourMasterIndex = masterIndex;
-    const master = texforeverColourMaster[activeColourMasterIndex]; 
-    selectedColourForPopup = master.shades[shadeIndex || 0] || master.shades[0];
+    const master = texforeverColourMaster[activeColourMasterIndex] || texforeverColourMaster[0];
+    selectedColourForPopup = master?.shades?.[shadeIndex || 0] || master?.shades?.[0] || null;
     colourPopupTarget = { type:targetType, index:targetIndex };
     
     if($("editingTargetInfo")) {
