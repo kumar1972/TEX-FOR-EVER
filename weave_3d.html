@@ -1802,7 +1802,6 @@ function getCurrentData() {
     };
 }
 
-
 async function saveCurrentDesign() {
     try {
         setStatus("⏳ Saving...");
@@ -1833,14 +1832,39 @@ async function saveCurrentDesign() {
         data.timestamp = new Date().toISOString();
         let cleanName = cleanDesignName(name);
 
-        // 1. LOCAL SAVE (COMPULSORY)
+        // 1. LOCAL EDITS CACHE UPDATE
         try {
             let edits = JSON.parse(localStorage.getItem("local_edits_cache") || "{}");
             edits[cleanName] = { ...(edits[cleanName] || {}), ...data };
             localStorage.setItem("local_edits_cache", JSON.stringify(edits));
-            localStorage.setItem("last_edit_timestamp", Date.now().toString());
-            window._lastEditStamp = localStorage.getItem("last_edit_timestamp");
-        } catch(e) { console.error("Local Edit Cache Error:", e); }
+        } catch(e) {}
+
+        // 2. WARP ENTRY DATA UPDATE (Idhu thaan rombha mukkiyam - Refresh seiyum pothu maramal irukka)
+        try {
+            let warpDataArr = JSON.parse(localStorage.getItem("warp_entry_data") || "[]");
+            let wIdx = warpDataArr.findIndex(w => cleanDesignName(designName(w)) === cleanName);
+            if(wIdx !== -1) {
+                warpDataArr[wIdx].warpLines = currentInputs.warpLines;
+            } else {
+                warpDataArr.push({ designNo: name, name: name, warpLines: currentInputs.warpLines });
+            }
+            localStorage.setItem("warp_entry_data", JSON.stringify(warpDataArr));
+        } catch(e) {}
+
+        // 3. WEFT ENTRY DATA UPDATE
+        try {
+            let weftDataArr = JSON.parse(localStorage.getItem("weft_entry_data") || "[]");
+            let fIdx = weftDataArr.findIndex(f => cleanDesignName(designName(f)) === cleanName);
+            if(fIdx !== -1) {
+                weftDataArr[fIdx].weftLines = currentInputs.weftLines;
+            } else {
+                weftDataArr.push({ designNo: name, name: name, weftLines: currentInputs.weftLines });
+            }
+            localStorage.setItem("weft_entry_data", JSON.stringify(weftDataArr));
+        } catch(e) {}
+
+        localStorage.setItem("last_edit_timestamp", Date.now().toString());
+        window._lastEditStamp = localStorage.getItem("last_edit_timestamp");
 
         let cache = Array.isArray(allCloudDesigns) ? allCloudDesigns.filter(x => cleanDesignName(designName(x)) !== cleanName) : []; 
         cache.push(clone(data));
@@ -1855,28 +1879,26 @@ async function saveCurrentDesign() {
         
         draw3DWeave(); 
 
-        // 2. CLOUD SAVE (IF ONLINE)
-        let cloudSaved = false;
+        setStatus("✅ Saved Locally");
+        alert("✅ Design Local-il (Warp Entry utpada) வெற்றிகரமாக Save ஆகிவிட்டது!");
+
+        // 4. CLOUD SAVE (SECONDARY ASYNC)
         if (navigator.onLine) {
-            try {
-                if (typeof window.supabaseSaveCloud === "function") {
-                    await window.supabaseSaveCloud("weave_designs", data);
-                    cloudSaved = true;
-                } else if (supabaseClient) {
-                    const saveResult = await supabaseClient.from("weave_designs").upsert([data]);
-                    if (!saveResult.error) cloudSaved = true;
+            setTimeout(async () => {
+                try {
+                    let cloudSaved = false;
+                    if (typeof window.supabaseSaveCloud === "function") {
+                        await window.supabaseSaveCloud("weave_designs", data);
+                        cloudSaved = true;
+                    } else if (supabaseClient) {
+                        const saveResult = await supabaseClient.from("weave_designs").upsert([data]);
+                        if (!saveResult.error) cloudSaved = true;
+                    }
+                    if(cloudSaved) setStatus("✅ Local & Cloud Saved!");
+                } catch (err) {
+                    console.log("Cloud save failed:", err);
                 }
-            } catch (err) {
-                console.log("Cloud save failed:", err);
-            }
-        }
-        
-        if (cloudSaved) {
-            setStatus("✅ Local & Cloud Saved!");
-            alert("✅ Design Local & Cloud-il வெற்றிகரமாக Save ஆகிவிட்டது!");
-        } else {
-            setStatus("✅ Saved Locally");
-            alert("✅ Design Local-il Save ஆகிவிட்டது! (Offline / Cloud Sync Pending)");
+            }, 500);
         }
     } catch(error) { 
         alert("Error: " + error.message);
