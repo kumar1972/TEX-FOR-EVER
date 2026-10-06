@@ -1882,24 +1882,18 @@ async function saveCurrentDesign() {
         setStatus("✅ Saved Locally");
         alert("✅ Design Local-il (Warp Entry utpada) வெற்றிகரமாக Save ஆகிவிட்டது!");
 
-        // 4. CLOUD SAVE (SECONDARY ASYNC)
-        if (navigator.onLine) {
+                // 4. CLOUD SAVE (USING CENTRALIZED SUPABASE SAVE)
+        if (navigator.onLine && typeof window.supabaseSave === "function") {
             setTimeout(async () => {
                 try {
-                    let cloudSaved = false;
-                    if (typeof window.supabaseSaveCloud === "function") {
-                        await window.supabaseSaveCloud("weave_designs", data);
-                        cloudSaved = true;
-                    } else if (supabaseClient) {
-                        const saveResult = await supabaseClient.from("weave_designs").upsert([data]);
-                        if (!saveResult.error) cloudSaved = true;
-                    }
-                    if(cloudSaved) setStatus("✅ Local & Cloud Saved!");
+                    await window.supabaseSave("weave_designs", data);
+                    setStatus("✅ Local & Cloud Saved!");
                 } catch (err) {
                     console.log("Cloud save failed:", err);
                 }
-            }, 500);
+            }, 300);
         }
+
     } catch(error) { 
         alert("Error: " + error.message);
         setStatus("❌ Error saving");
