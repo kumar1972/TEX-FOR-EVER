@@ -139,32 +139,36 @@ window.TEXFOREVER_CLOUD = {
     STORAGE: false,
     RTDB: true // Kept for compatibility flags if any
 };
-
 // ============================================================
-// SUPABASE CONFIG
+// SUPABASE CONFIG (Settings Page-ல் இருந்து Auto-fetch செய்யும் முறை)
 // ============================================================
 
-function readSupabaseStoredValue(key) {
-    try {
-        const raw = (window.StorageDB && typeof window.StorageDB.getItem === "function")
-            ? window.StorageDB.getItem(key)
-            : localStorage.getItem(key);
-        if (raw === null || raw === undefined) return "";
+function readSupabaseStoredValue(primaryKey, alternativeKeys = []) {
+    const keysToTry = [primaryKey, ...alternativeKeys];
+    for (let key of keysToTry) {
         try {
-            const parsed = JSON.parse(raw);
-            return (typeof parsed === "string") ? parsed : (parsed == null ? "" : String(parsed));
-        } catch (e) {
-            return raw; // wasn't JSON-encoded, use as-is (backward compatible)
-        }
-    } catch (e) {
-        return "";
+            const raw = (window.StorageDB && typeof window.StorageDB.getItem === "function")
+                ? window.StorageDB.getItem(key)
+                : localStorage.getItem(key);
+            if (raw !== null && raw !== undefined && raw !== "") {
+                try {
+                    const parsed = JSON.parse(raw);
+                    let val = (typeof parsed === "string") ? parsed : (parsed == null ? "" : String(parsed));
+                    if (val.trim() !== "") return val;
+                } catch (e) {
+                    if (String(raw).trim() !== "") return raw;
+                }
+            }
+        } catch (e) {}
     }
+    return "";
 }
 
 window.TEXFOREVER_SUPABASE_CONFIG = {
-    url: readSupabaseStoredValue("custom_supabase_url"),
-    key: readSupabaseStoredValue("custom_supabase_key")
+    url: readSupabaseStoredValue("custom_supabase_url", ["supabase_url", "supabaseUrl", "serverUrl", "db_url"]),
+    key: readSupabaseStoredValue("custom_supabase_key", ["supabase_key", "supabaseKey", "apiKey", "db_key"])
 };
+
 // ============================================================
 // GLOBAL SUPABASE VARIABLES
 // ============================================================
