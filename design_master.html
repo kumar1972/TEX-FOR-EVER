@@ -476,9 +476,11 @@
         return foundKey ? foundKey : designNo;
     }
 
-    // Force Cloud Restore Function (Properly inside script tag)
+        // Force Cloud Restore Function (Corrected)
     window.forceCloudRestore = async function() {
-        if (!window.supabase) {
+        let client = window.supabaseClient || (window.supabase && typeof window.supabase.from === 'function' ? window.supabase : null);
+        
+        if (!client) {
             alert("Supabase connect ஆகவில்லை! config.js பைலில் உங்களின் URL மற்றும் KEY சரியாக உள்ளதா என சரிபார்க்கவும்."); 
             return;
         }
@@ -486,7 +488,7 @@
             document.querySelector('button[onclick="forceCloudRestore()"]').innerText = "Downloading Data... ⏳";
             
             // 1. Masters
-            let { data: masters } = await window.supabase.from('design_masters_data').select('*');
+            let { data: masters } = await client.from('design_masters_data').select('*');
             if (masters && masters.length > 0) {
                 localStorage.setItem('design_masters_data', JSON.stringify(masters));
                 let preList = masters.map(m => m.designNo || m.name);
@@ -494,7 +496,7 @@
             }
             
             // 2. Specs
-            let { data: specs } = await window.supabase.from('design_specs').select('*');
+            let { data: specs } = await client.from('design_specs').select('*');
             if (specs && specs.length > 0) {
                 let specObj = {};
                 specs.forEach(s => { specObj[s.designNo || s.id] = s; });
@@ -502,17 +504,17 @@
             }
             
             // 3. Weave 3D Data
-            let { data: weave } = await window.supabase.from('weave_designs').select('*');
+            let { data: weave } = await client.from('weave_designs').select('*');
             if (weave && weave.length > 0) localStorage.setItem('weave_designs', JSON.stringify(weave));
             
             // 4. Warp, Weft & Denting Entries
-            let { data: warp } = await window.supabase.from('warp_entry_data').select('*');
+            let { data: warp } = await client.from('warp_entry_data').select('*');
             if (warp && warp.length > 0) localStorage.setItem('warp_entry_data', JSON.stringify(warp));
             
-            let { data: weft } = await window.supabase.from('weft_entry_data').select('*');
+            let { data: weft } = await client.from('weft_entry_data').select('*');
             if (weft && weft.length > 0) localStorage.setItem('weft_entry_data', JSON.stringify(weft));
             
-            let { data: dent } = await window.supabase.from('denting_drawing_data').select('*');
+            let { data: dent } = await client.from('denting_drawing_data').select('*');
             if (dent && dent.length > 0) localStorage.setItem('denting_drawing_data', JSON.stringify(dent));
 
             alert("✅ Cloud-ல் இருந்து Data முழுமையாக Local-க்கு வந்துவிட்டது! பேஜ் Reload ஆகிறது.");
@@ -522,6 +524,7 @@
             document.querySelector('button[onclick="forceCloudRestore()"]').innerText = "☁️ RECOVER ALL DATA FROM CLOUD";
         }
     };
+
 
     document.addEventListener('DOMContentLoaded', function() {
         if (!checkUserPermission()) {
