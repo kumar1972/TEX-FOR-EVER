@@ -1671,8 +1671,9 @@ function getCurrentData() {
             let hex = (c.value || "#ffffff").toLowerCase();
             
             w.push({ 
-                colourName: cleanBaseColorName(origName), 
+                colourName: origName || cleanBaseColorName(origName), 
                 origName: origName,
+                colour: hex,
                 color: hex, 
                 hex: hex, 
                 count: cnt, 
@@ -1696,8 +1697,9 @@ function getCurrentData() {
             let hex = (c.value || "#ffffff").toLowerCase();
             
             f.push({ 
-                colourName: cleanBaseColorName(origName), 
+                colourName: origName || cleanBaseColorName(origName), 
                 origName: origName,
+                colour: hex,
                 color: hex, 
                 hex: hex, 
                 count: cnt, 
@@ -1723,6 +1725,7 @@ function getCurrentData() {
         dentingPatternFormula: dentP, drawingPatternFormula: drawP
     };
 }
+
 
 async function saveCurrentDesign() {
     try {
