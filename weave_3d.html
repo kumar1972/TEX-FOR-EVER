@@ -1163,48 +1163,25 @@ function pickRicherArray(arr1, arr2) {
     if (!Array.isArray(arr2) || arr2.length === 0) return arr1;
     return arr2.length >= arr1.length ? arr2 : arr1;
 }
-
 function mergeDesigns(items) {
     let map = new Map();
+    let rawEdits = {};
+    try { rawEdits = JSON.parse(localStorage.getItem("local_edits_cache") || "{}"); } catch(e) {}
+
     (items||[]).filter(Boolean).forEach(rawD => {
         let d = sanitizeDesignObj(clone(rawD));
         let n = cleanDesignName(designName(d)); 
         if(!n || n==="unnamed") return;
-        let old = map.get(n); 
-        if(!old) {
-            map.set(n, d);
-        } else {
-            let mergedCustomMatrix = (d.customMatrix && d.customMatrix.length) ? d.customMatrix : 
-                                    ((d.matrix && d.matrix.length) ? d.matrix : 
-                                    ((d.weaveGraph && d.weaveGraph.length) ? d.weaveGraph : 
-                                    ((old.customMatrix && old.customMatrix.length) ? old.customMatrix : 
-                                    ((old.matrix && old.matrix.length) ? old.matrix : old.weaveGraph))));
-
-            let mergedDrawingFormula = d.drawingPatternFormula || d.drawingPattern || d.drawingOrder || d.drawing_order || d.draft || 
-                                       old.drawingPatternFormula || old.drawingPattern || old.drawingOrder || old.drawing_order || old.draft;
-            let mergedDrawing = d.drawingPattern || d.drawingPatternFormula || d.drawingOrder || d.drawing_order || d.draft || 
-                                old.drawingPattern || old.drawingPatternFormula || old.drawingOrder || old.drawing_order || old.draft;
-            let mergedDentingFormula = d.dentingPatternFormula || d.dentingPattern || old.dentingPatternFormula || old.dentingPattern;
-            let mergedDenting = d.dentingPattern || d.dentingPatternFormula || old.dentingPattern || old.dentingPatternFormula;
-
-            let mergedType = (mergedCustomMatrix && mergedCustomMatrix.length) ? "custom" : (d.type || old.type || "custom");
-
-            map.set(n, { 
-                ...old, 
-                ...d, 
-                warpLines: pickRicherArray(old.warpLines, d.warpLines), 
-                weftLines: pickRicherArray(old.weftLines, d.weftLines), 
-                warpRanges: pickRicherArray(old.warpRanges, d.warpRanges), 
-                weftRanges: pickRicherArray(old.weftRanges, d.weftRanges), 
-                customMatrix: mergedCustomMatrix, 
-                dentingPattern: mergedDenting, 
-                drawingPattern: mergedDrawing, 
-                dentingPatternFormula: mergedDentingFormula, 
-                drawingPatternFormula: mergedDrawingFormula,
-                type: mergedType
-            });
+        
+        // எடிட் கேட்ச் இருக்கிறதா எனப் பார்த்து, இருந்தால் உடனே அதை ஓவர்ரைட் செய்ய வேண்டும்
+        if (rawEdits[n]) {
+            d = { ...d, ...rawEdits[n] };
         }
+        map.set(n, d);
     });
+
+    return [...map.values()];
+}
 
     let rawEdits = {};
     try { rawEdits = JSON.parse(localStorage.getItem("local_edits_cache") || "{}"); } catch(e) {}
@@ -1232,7 +1209,7 @@ function mergeDesigns(items) {
     });
 
     return finalArray;
-}
+
 
 /* ================= YARN SETTINGS & UI ================= */
 function renderUIWithData(w=[], f=[]) {
@@ -1474,17 +1451,10 @@ async function importFromFirebase(manual = false) {
                     localStorage.setItem("weave_designs_cache", JSON.stringify(allCloudDesigns));
                     populateDesignSelect(manual);
                     setStatus("☁ Local + Cloud designs ready");
-                } else if (allCloudDesigns.length > 0) {
-                    setStatus("💾 Local designs ready");
                 }
             } catch(cErr) {
                 console.log("Supabase load skipped/failed", cErr);
-                setStatus(allCloudDesigns.length > 0 ? "💾 Local designs ready" : "ℹ️ Design இல்லை");
             }
-        } else if (!navigator.onLine) {
-            setStatus(allCloudDesigns.length > 0 ? "📴 Offline Mode (Local Only)" : "ℹ️️ Design இல்லை");
-        } else {
-            setStatus(allCloudDesigns.length > 0 ? "💾 Local designs ready" : "ℹ️ Design இல்லை");
         }
     } catch(e) {
         setStatus("⚠️ Error: " + e.message);
