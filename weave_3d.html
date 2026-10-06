@@ -1016,35 +1016,26 @@ function colorName(n) {
     if(/^#[0-9a-f]{6}$/i.test(s)) return s;
     if(/^#[0-9a-f]{3}$/i.test(s)) return "#" + s[1]+s[1] + s[2]+s[2] + s[3]+s[3];
 
-    let engName = s;
-    if (typeof COLOR_TRANSLATIONS !== 'undefined') {
-        for (let [eng, tam] of Object.entries(COLOR_TRANSLATIONS)) {
-            if (s.includes(tam.toLowerCase())) {
-                engName = eng.toLowerCase();
-                break;
-            }
-        }
-    }
+    // T-code அடிப்படையிலான பிரத்யேக நிறப் பொருத்தம்
+    if (s.includes('t-04') || s.includes('t-60') || s.includes('white') || s.includes('salavai')) return "#ffffff";
+    if (s.includes('t-51') || s.includes('t-52') || s.includes('blue')) return "#1688d8";
+    if (s.includes('t-32') || s.includes('t-01') || s.includes('r. blue')) return "#1e3a8a";
 
     if (typeof texforeverColourMaster !== 'undefined') {
         for (let group of texforeverColourMaster) {
             for (let shade of group.shades) {
                 let sName = shade.name.toLowerCase();
                 let sTag = (shade.shadeTag || "").toLowerCase();
-                if ((sTag && engName.includes(sTag)) || sName.includes(engName) || engName.includes(sName)) {
+                if ((sTag && s.includes(sTag)) || sName.includes(s) || s.includes(sName)) {
                     return shade.hex;
                 }
             }
         }
-        for (let group of texforeverColourMaster) {
-            if (engName.includes(group.name.toLowerCase()) || group.name.toLowerCase().includes(engName)) {
-                return group.shades[30].hex;
-            }
-        }
     }
 
-    return "#94a3b8"; 
+    return "#3b82f6"; 
 }
+
 
 /* ================= 2/40 & SEERSUCKER THICKNESS ENGINE ================= */
 function parseYarnInfo(countStr, nameStr, colStr) {
