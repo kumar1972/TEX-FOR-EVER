@@ -12,12 +12,12 @@
 // ============================================
 // CONFIG.JS - INLINE
 // ============================================
-const SUPABASE_URL = "https://your-supabase-url.supabase.co";
-const SUPABASE_KEY = "your-supabase-key";
+const SUPABASE_URL = (localStorage.getItem("custom_supabase_url") || "").trim();
+const SUPABASE_KEY = (localStorage.getItem("custom_supabase_key") || "").trim();
 
-// Initialize Supabase (safe fallback)
+// Initialize Supabase (safe local-only fallback)
 let supabaseClient = null;
-if (typeof window.supabase !== 'undefined') {
+if (typeof window.supabase !== 'undefined' && SUPABASE_URL && SUPABASE_KEY) {
     try {
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     } catch(e) {
@@ -28,7 +28,7 @@ if (typeof window.supabase !== 'undefined') {
 // ============================================
 // TRANSLATOR.JS - INLINE (Tamil Translations)
 // ============================================
-const COLOR_TRANSLATIONS = {
+const CONFIG_COLOR_TRANSLATIONS = {
     "red": "சிவப்பு",
     "blue": "நீலம்",
     "green": "பச்சை",
@@ -1498,33 +1498,30 @@ async function importFromFirebase(manual = false) {
             setStatus("💾 Local designs ready");
         }
 
-        if (navigator.onLine) {
+        if (navigator.onLine && supabaseClient) {
             try {
                 let cloudData = [];
-                if (typeof window.supabaseLoadCloud === "function") {
-                    let cMasters = await window.supabaseLoadCloud("design_masters_data", null);
-                    let cWeave = await window.supabaseLoadCloud("weave_designs", null);
-                    if (Array.isArray(cMasters)) cloudData.push(...cMasters);
-                    if (Array.isArray(cWeave)) cloudData.push(...cWeave);
-                } else if (window.supabase) {
-                    let resM = await window.supabase.from('design_masters_data').select('*');
-                    let resW = await window.supabase.from('weave_designs').select('*');
-                    if(resM.data) cloudData.push(...resM.data);
-                    if(resW.data) cloudData.push(...resW.data);
-                }
+                const resM = await supabaseClient.from("design_masters_data").select("*");
+                const resW = await supabaseClient.from("weave_designs").select("*");
+                if (resM && !resM.error && Array.isArray(resM.data)) cloudData.push(...resM.data);
+                if (resW && !resW.error && Array.isArray(resW.data)) cloudData.push(...resW.data);
 
                 if (cloudData.length > 0) {
                     allCloudDesigns = mergeDesigns(allCloudDesigns.concat(cloudData));
                     localStorage.setItem("weave_designs_cache", JSON.stringify(allCloudDesigns));
                     populateDesignSelect(manual);
                     setStatus("☁ Local + Cloud designs ready");
+                } else if (allCloudDesigns.length > 0) {
+                    setStatus("💾 Local designs ready");
                 }
             } catch(cErr) {
                 console.log("Supabase load skipped/failed", cErr);
-                setStatus("💾 Loaded Local Only (Cloud failed)");
+                setStatus(allCloudDesigns.length > 0 ? "💾 Local designs ready" : "ℹ️ Design இல்லை");
             }
+        } else if (!navigator.onLine) {
+            setStatus(allCloudDesigns.length > 0 ? "📴 Offline Mode (Local Only)" : "ℹ️ Design இல்லை");
         } else {
-            setStatus("📴 Offline Mode (Local Only)");
+            setStatus(allCloudDesigns.length > 0 ? "💾 Local designs ready" : "ℹ️ Design இல்லை");
         }
     } catch(e) {
         setStatus("⚠️ Error: " + e.message);
@@ -1812,9 +1809,9 @@ async function saveCurrentDesign() {
                 if (typeof window.supabaseSaveCloud === "function") {
                     await window.supabaseSaveCloud("weave_designs", data);
                     cloudSaved = true;
-                } else if (window.supabase) {
-                    await window.supabase.from('weave_designs').upsert([data]);
-                    cloudSaved = true;
+                } else if (supabaseClient) {
+                    const saveResult = await supabaseClient.from("weave_designs").upsert([data]);
+                    if (!saveResult.error) cloudSaved = true;
                 }
             } catch (err) {
                 console.log("Cloud save failed:", err);
