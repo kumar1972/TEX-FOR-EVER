@@ -1016,26 +1016,35 @@ function colorName(n) {
     if(/^#[0-9a-f]{6}$/i.test(s)) return s;
     if(/^#[0-9a-f]{3}$/i.test(s)) return "#" + s[1]+s[1] + s[2]+s[2] + s[3]+s[3];
 
-    // T-code அடிப்படையிலான பிரத்யேக நிறப் பொருத்தம்
-    if (s.includes('t-04') || s.includes('t-60') || s.includes('white') || s.includes('salavai')) return "#ffffff";
-    if (s.includes('t-51') || s.includes('t-52') || s.includes('blue')) return "#1688d8";
-    if (s.includes('t-32') || s.includes('t-01') || s.includes('r. blue')) return "#1e3a8a";
+    let engName = s;
+    if (typeof COLOR_TRANSLATIONS !== 'undefined') {
+        for (let [eng, tam] of Object.entries(COLOR_TRANSLATIONS)) {
+            if (s.includes(tam.toLowerCase())) {
+                engName = eng.toLowerCase();
+                break;
+            }
+        }
+    }
 
     if (typeof texforeverColourMaster !== 'undefined') {
         for (let group of texforeverColourMaster) {
             for (let shade of group.shades) {
                 let sName = shade.name.toLowerCase();
                 let sTag = (shade.shadeTag || "").toLowerCase();
-                if ((sTag && s.includes(sTag)) || sName.includes(s) || s.includes(sName)) {
+                if ((sTag && engName.includes(sTag)) || sName.includes(engName) || engName.includes(sName)) {
                     return shade.hex;
                 }
             }
         }
+        for (let group of texforeverColourMaster) {
+            if (engName.includes(group.name.toLowerCase()) || group.name.toLowerCase().includes(engName)) {
+                return group.shades[30].hex;
+            }
+        }
     }
 
-    return "#3b82f6"; 
+    return "#94a3b8"; 
 }
-
 
 /* ================= 2/40 & SEERSUCKER THICKNESS ENGINE ================= */
 function parseYarnInfo(countStr, nameStr, colStr) {
@@ -1515,61 +1524,69 @@ function loadSelectedDesign(){
         }
         localStorage.setItem("weave_last_design_name", dName);
         
-                let foundEdits = null;
+        let foundEdits = null;
         try {
             let editsCache = JSON.parse(localStorage.getItem("local_edits_cache") || "{}");
             let key = Object.keys(editsCache).find(k => cleanDesignName(k) === cleanName);
             if(key) foundEdits = editsCache[key];
         } catch(e) {}
 
+        let dentDrawMatch = null;
+        try {
+            let ddArr = JSON.parse(localStorage.getItem("denting_drawing_data") || "[]");
+            if(Array.isArray(ddArr)) {
+                dentDrawMatch = ddArr.find(d => cleanDesignName(designName(d)) === cleanName);
+            }
+        } catch(e) {}
+
+        let dMasters = safeJSON("design_masters_data", []);
+        let masterMatch = Array.isArray(dMasters) ? dMasters.find(m => cleanDesignName(designName(m)) === cleanName) : null;
+
         let rawWarp = [];
         let rawWeft = [];
-
-        // 1. FIRST PRIORITY: எப்போதும் local_edits_cache-ல் உள்ள லேட்டஸ்ட் கலர் மாற்றங்கள் எடுக்கப்பட வேண்டும்
-        if (foundEdits && foundEdits.warpLines && foundEdits.warpLines.length > 0) {
-            rawWarp = clone(foundEdits.warpLines);
-        }
-        if (foundEdits && foundEdits.weftLines && foundEdits.weftLines.length > 0) {
-            rawWeft = clone(foundEdits.weftLines);
-        }
-
-        // 2. SECOND PRIORITY: local_edits இல்லாவிட்டால் மட்டும் warp_entry_data-வைப் பார்க்கவும்
-        if (!rawWarp.length) {
-            let warpKeys = ["warp_entry_data", "warp_pattern_data", "warp_data"];
-            for(let key of warpKeys) {
-                try {
-                    let data = localStorage.getItem(key);
-                    if(data) {
-                        let parsed = JSON.parse(data);
-                        if(Array.isArray(parsed)) {
-                            let match = parsed.find(w => cleanDesignName(designName(w)) === cleanName);
-                            if(match && match.warpLines && match.warpLines.length > 0) { 
-                                rawWarp = clone(match.warpLines);
+        
+        let warpKeys = ["warp_entry_data", "warp_pattern_data", "warp_data"];
+        for(let key of warpKeys) {
+            try {
+                let data = localStorage.getItem(key);
+                if(data) {
+                    let parsed = JSON.parse(data);
+                    if(Array.isArray(parsed)) {
+                        let match = parsed.find(w => cleanDesignName(designName(w)) === cleanName);
+                        if(match) {
+                            let lines = match.warpLines || match.warpYarns || match.lines || match.entries || match.rows || match.data || match.pattern;
+                            if(lines && lines.length > 0) { 
+                                rawWarp = clone(lines); 
+                                let r = match.warpRanges || match.ranges || match.warp_ranges;
+                                if(r) activeDesignObj.warpRanges = clone(r);
                                 break; 
                             }
                         }
                     }
-                } catch(e) {}
-            }
+                }
+            } catch(e) {}
         }
 
-        if (!rawWeft.length) {
-            let weftKeys = ["weft_entry_data", "weft_pattern_data", "weft_data"];
-            for(let key of weftKeys) {
-                try {
-                    let data = localStorage.getItem(key);
-                    if(data) {
-                        let parsed = JSON.parse(data);
-                        if(Array.isArray(parsed)) {
-                            let match = parsed.find(w => cleanDesignName(designName(w)) === cleanName);
-                            if(match && match.weftLines && match.weftLines.length > 0) { 
-                                rawWeft = clone(match.weftLines);
+        let weftKeys = ["weft_entry_data", "weft_pattern_data", "weft_data"];
+        for(let key of weftKeys) {
+            try {
+                let data = localStorage.getItem(key);
+                if(data) {
+                    let parsed = JSON.parse(data);
+                    if(Array.isArray(parsed)) {
+                        let match = parsed.find(w => cleanDesignName(designName(w)) === cleanName);
+                        if(match) {
+                            let lines = match.weftLines || match.weftYarns || match.lines || match.entries || match.rows || match.data || match.pattern;
+                            if(lines && lines.length > 0) { 
+                                rawWeft = clone(lines); 
+                                let r = match.weftRanges || match.ranges || match.weft_ranges;
+                                if(r) activeDesignObj.weftRanges = clone(r);
                                 break; 
                             }
                         }
                     }
-                } catch(e) {}
-            }
+                }
+            } catch(e) {}
         }
 
         if(!rawWarp.length) {
@@ -1671,9 +1688,8 @@ function getCurrentData() {
             let hex = (c.value || "#ffffff").toLowerCase();
             
             w.push({ 
-                colourName: origName || cleanBaseColorName(origName), 
+                colourName: cleanBaseColorName(origName), 
                 origName: origName,
-                colour: hex,
                 color: hex, 
                 hex: hex, 
                 count: cnt, 
@@ -1697,9 +1713,8 @@ function getCurrentData() {
             let hex = (c.value || "#ffffff").toLowerCase();
             
             f.push({ 
-                colourName: origName || cleanBaseColorName(origName), 
+                colourName: cleanBaseColorName(origName), 
                 origName: origName,
-                colour: hex,
                 color: hex, 
                 hex: hex, 
                 count: cnt, 
@@ -1725,7 +1740,6 @@ function getCurrentData() {
         dentingPatternFormula: dentP, drawingPatternFormula: drawP
     };
 }
-
 
 async function saveCurrentDesign() {
     try {
@@ -3447,7 +3461,7 @@ function buildWarpTable(lines) {
             
             h += `<tr>
                 <td>${visualRowIdx++}</td>
-                <td><div class="color-swatch" style="background:${l.hex || l.color || colorName(l.colourName || l.origName)};"></div></td>
+                <td><div class="color-swatch" style="background:${l.hex || l.color};"></div></td>
                 <td style="text-align:left; font-weight:800; line-height:1.2; color:#111827 !important;">${cleanName}</td>
                 <td style="font-weight:950; font-size:10px;">${amt}</td>
                 <td style="font-size:10px; color:#9caea4; vertical-align:middle;">-</td>
