@@ -14,6 +14,7 @@
 // ✅ Existing ERP firebaseSave() compatibility
 // ✅ IndexedDB Unlimited Storage Integration
 // ✅ Settings Cloud Sync Switch (ON / OFF Guard)
+// ✅ Auto-Sync Interceptor for All Pages
 // ============================================================
 
 "use strict";
@@ -277,6 +278,9 @@ window.erpCloudKeys = [
     "pre_design_numbers",
     "design_masters_data",
     "weft_entry_data",
+    "warp_entry_data",
+    "denting_drawing_data",
+    "weave_designs",
     "warping_issue_records",
     "weaving_master_data",
     "weaving_warp_trans",
@@ -699,6 +703,27 @@ window.firebaseSave = async function (key, data) {
 };
 
 window.supabaseSave = window.firebaseSave;
+
+// ============================================================
+// AUTO-SYNC INTERCEPTOR (எந்த பக்கத்தில் சேவ் ஆனாலும் ஆட்டோமேட்டிக்காக Supabase erp_sync_data-க்கு அனுப்பும்)
+// ============================================================
+const originalLocalStorageSet = localStorage.setItem;
+localStorage.setItem = function(key, value) {
+    originalLocalStorageSet.apply(this, arguments);
+    if (key && !key.startsWith("__") && !key.includes("theme") && !key.includes("zoom")) {
+        if (window.isCloudSyncActive && window.isCloudSyncActive()) {
+            let parsedData = value;
+            try { parsedData = JSON.parse(value); } catch(e) {}
+            if (window.supabaseClient) {
+                cloudSave(key, parsedData);
+            } else {
+                window.initializeSupabase(false).then(() => {
+                    if (window.supabaseClient) cloudSave(key, parsedData);
+                });
+            }
+        }
+    }
+};
 
 // ============================================================
 // COMPATIBILITY SAVE
@@ -1450,7 +1475,7 @@ setTimeout(function () {
 // ============================================================
 
 console.log("================================================");
-console.log("✅ TEX FOR EVER config.js loaded");
+console.log("✅ TEX FOR EVER config.js loaded (Auto-Sync Enabled)");
 console.log("☁️ MODE: LOCAL-FIRST + SUPABASE");
 console.log("☁️ Supabase: " + (window.isCloudSyncActive() ? "ENABLED" : "DISABLED (OFFLINE)"));
 console.log("💾 LocalStorage: ENABLED (Backed by IndexedDB)");
