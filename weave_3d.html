@@ -1027,19 +1027,15 @@ function colorName(n) {
     }
 
     if (typeof texforeverColourMaster !== 'undefined') {
-        // 1. Mudhalil specific T-code / Shade name match aagudha ena check seiya vendum
         for (let group of texforeverColourMaster) {
             for (let shade of group.shades) {
                 let sName = shade.name.toLowerCase();
                 let sTag = (shade.shadeTag || "").toLowerCase();
-                // Tag (T-46) irundhal udane exact shade-ai return seiyum
                 if ((sTag && engName.includes(sTag)) || sName.includes(engName) || engName.includes(sName)) {
                     return shade.hex;
                 }
             }
         }
-        
-        // 2. Specific shade kidaikkavillai endraal mattum base color (Shade 30)-ai edukka vendum
         for (let group of texforeverColourMaster) {
             if (engName.includes(group.name.toLowerCase()) || group.name.toLowerCase().includes(engName)) {
                 return group.shades[30].hex;
@@ -1049,7 +1045,6 @@ function colorName(n) {
 
     return "#94a3b8"; 
 }
-
 
 /* ================= 2/40 & SEERSUCKER THICKNESS ENGINE ================= */
 function parseYarnInfo(countStr, nameStr, colStr) {
@@ -1132,7 +1127,6 @@ function normLine(x, warp) {
         shadeTag: shadeTag 
     };
 }
-
 
 function sanitizeDesignObj(d) {
     if (!d) return null;
@@ -1254,11 +1248,6 @@ function renderUIWithData(w=[], f=[]) {
     try {
         if (!Array.isArray(w)) w = []; if (!Array.isArray(f)) f = [];
         
-        let validW = w.filter(line => (line && (Number(line.ends) > 0 || Number(line.amount) > 0 || line.color || line.colourName)));
-        let validF = f.filter(line => (line && (Number(line.picks) > 0 || Number(line.amount) > 0 || line.color || line.colourName)));
-        
-        // Keep the original row positions/counts. Filtering here can shift W2/W3
-        // into W1/W2 when an earlier row is temporarily empty.
         let wc = w.length;
         let fc = f.length;
 
@@ -1279,10 +1268,6 @@ function renderUIWithData(w=[], f=[]) {
             let rawOrigName = getLocalizedColorName(x.origName) || x.origName || "Custom";
             
             let countVal = x.count || "";
-            if(!countVal && x.origName) {
-                let m = String(x.origName).match(/\d+[\/sS]\d+/);
-                if(m) countVal = m[0];
-            }
             let countPrefix = countVal ? `<span style="color:#f59e0b; font-size:0.72rem; font-weight:bold; margin-right:5px;">[${escapeColourText(countVal)}]</span>` : "";
             let shadeTagBadge = x.shadeTag ? `<span style="background:#2563eb;color:#fff;padding:1px 4px;border-radius:3px;font-size:0.58rem;margin-left:4px;">${escapeColourText(x.shadeTag)}</span>` : "";
 
@@ -1308,10 +1293,6 @@ function renderUIWithData(w=[], f=[]) {
             let rawOrigName = getLocalizedColorName(x.origName) || x.origName || "Custom";
             
             let countVal = x.count || "";
-            if(!countVal && x.origName) {
-                let m = String(x.origName).match(/\d+[\/sS]\d+/);
-                if(m) countVal = m[0];
-            }
             let countPrefix = countVal ? `<span style="color:#f59e0b; font-size:0.72rem; font-weight:bold; margin-right:5px;">[${escapeColourText(countVal)}]</span>` : "";
             let shadeTagBadge = x.shadeTag ? `<span style="background:#2563eb;color:#fff;padding:1px 4px;border-radius:3px;font-size:0.58rem;margin-left:4px;">${escapeColourText(x.shadeTag)}</span>` : "";
 
@@ -1510,7 +1491,7 @@ async function importFromFirebase(manual = false) {
                 setStatus(allCloudDesigns.length > 0 ? "💾 Local designs ready" : "ℹ️ Design இல்லை");
             }
         } else if (!navigator.onLine) {
-            setStatus(allCloudDesigns.length > 0 ? "📴 Offline Mode (Local Only)" : "ℹ️ Design இல்லை");
+            setStatus(allCloudDesigns.length > 0 ? "📴 Offline Mode (Local Only)" : "ℹ️️ Design இல்லை");
         } else {
             setStatus(allCloudDesigns.length > 0 ? "💾 Local designs ready" : "ℹ️ Design இல்லை");
         }
@@ -1564,7 +1545,6 @@ function loadSelectedDesign(){
         let rawWarp = [];
         let rawWeft = [];
         
-        // 1. Warp Entry / Pattern Data-vai Load Seithal (Ranges utpada)
         let warpKeys = ["warp_entry_data", "warp_pattern_data", "warp_data"];
         for(let key of warpKeys) {
             try {
@@ -1578,7 +1558,7 @@ function loadSelectedDesign(){
                             if(lines && lines.length > 0) { 
                                 rawWarp = clone(lines); 
                                 let r = match.warpRanges || match.ranges || match.warp_ranges;
-                                if(r) activeDesignObj.warpRanges = clone(r); // Repeat set-ai import seiyum
+                                if(r) activeDesignObj.warpRanges = clone(r);
                                 break; 
                             }
                         }
@@ -1587,7 +1567,6 @@ function loadSelectedDesign(){
             } catch(e) {}
         }
 
-        // 2. Weft Entry / Pattern Data-vai Load Seithal
         let weftKeys = ["weft_entry_data", "weft_pattern_data", "weft_data"];
         for(let key of weftKeys) {
             try {
@@ -1610,7 +1589,6 @@ function loadSelectedDesign(){
             } catch(e) {}
         }
 
-        // 3. Fallback Data
         if(!rawWarp.length) {
             if(masterMatch && masterMatch.warpLines && masterMatch.warpLines.length > 0) rawWarp = clone(masterMatch.warpLines);
             else if(activeDesignObj.warpLines && activeDesignObj.warpLines.length > 0) rawWarp = clone(activeDesignObj.warpLines);
@@ -1620,53 +1598,14 @@ function loadSelectedDesign(){
             else if(activeDesignObj.weftLines && activeDesignObj.weftLines.length > 0) rawWeft = clone(activeDesignObj.weftLines);
         }
 
-        // 4. SMART COLOR OVERLAY (Warp Pattern-il color maariyirundhal Weave 3D local edit-ai discard seiyum)
+        // OVERRIDE WITH LOCAL EDITS (DIRECT FORCE)
         if (foundEdits && foundEdits.warpLines && foundEdits.warpLines.length > 0) {
-            if (rawWarp.length === 0) {
-                rawWarp = clone(foundEdits.warpLines);
-            } else {
-                rawWarp = rawWarp.map((w, idx) => {
-                    let edit = foundEdits.warpLines[idx];
-                    if (edit && edit.color) {
-                        let currentBase = cleanBaseColorName(w.colourName || w.origName || w.color || "").toLowerCase();
-                        let editBase = cleanBaseColorName(edit.origName || edit.colourName || "").toLowerCase();
-                        // Warp page-il base color maaramal irundhal mattume Weave 3D custom color apply aagum
-                        if (!editBase || currentBase === editBase) {
-                            w.color = edit.color;
-                            w.hex = edit.hex || edit.color;
-                            w.colourName = edit.colourName || w.colourName;
-                            w.origName = edit.origName || w.origName;
-                            w.shadeTag = edit.shadeTag || w.shadeTag;
-                        }
-                    }
-                    return w;
-                });
-            }
+            rawWarp = clone(foundEdits.warpLines);
         }
-
         if (foundEdits && foundEdits.weftLines && foundEdits.weftLines.length > 0) {
-            if (rawWeft.length === 0) {
-                rawWeft = clone(foundEdits.weftLines);
-            } else {
-                rawWeft = rawWeft.map((f, idx) => {
-                    let edit = foundEdits.weftLines[idx];
-                    if (edit && edit.color) {
-                        let currentBase = cleanBaseColorName(f.colourName || f.origName || f.color || "").toLowerCase();
-                        let editBase = cleanBaseColorName(edit.origName || edit.colourName || "").toLowerCase();
-                        if (!editBase || currentBase === editBase) {
-                            f.color = edit.color;
-                            f.hex = edit.hex || edit.color;
-                            f.colourName = edit.colourName || f.colourName;
-                            f.origName = edit.origName || f.origName;
-                            f.shadeTag = edit.shadeTag || f.shadeTag;
-                        }
-                    }
-                    return f;
-                });
-            }
+            rawWeft = clone(foundEdits.weftLines);
         }
 
-        // 5. Edhuvume illai endral ulla Default Sample Data
         if(!rawWarp.length) rawWarp = [
             { color: '#1e3a8a', ends: 27, colourName: 'Navy', count: '21 ccc' },
             { color: '#64748b', ends: 1, colourName: 'D. Grey', count: '21 ccc' }
@@ -1679,8 +1618,6 @@ function loadSelectedDesign(){
         currentWarpCount = rawWarp.length;
         currentWeftCount = rawWeft.length;
       
-
-        
         if(typeof renderUIWithData === "function") {
             renderUIWithData(rawWarp, rawWeft);
         }
@@ -1702,7 +1639,6 @@ function loadSelectedDesign(){
 
         let mCols = (weavePatterns.custom && weavePatterns.custom[0]) ? weavePatterns.custom[0].length : 4;
 
-        // denting_editor.html il save seiyappatta data-kku mudhal urimai (Priority)
         let drawVal = (dentDrawMatch && (dentDrawMatch.drawingPatternFormula || dentDrawMatch.drawingPattern || dentDrawMatch.drawingOrder || dentDrawMatch.draft)) || 
                       sourceObj.drawingPatternFormula || sourceObj.drawingPattern || sourceObj.drawingOrder || sourceObj.drawing_order || sourceObj.draft || "";
         
@@ -1738,6 +1674,7 @@ function loadSelectedDesign(){
         if(statusEl) statusEl.textContent = "❌ Error loading design";
     }
 }
+
 function getCurrentData() {
     let w = []; let f = []; let wRanges = []; let fRanges = []; 
     let wCurrentLine = 1;
@@ -1748,11 +1685,12 @@ function getCurrentData() {
             let origName = c.getAttribute('data-orig') || c.getAttribute('data-name') || "";
             let shadeTag = c.getAttribute('data-tag') || "";
             let cnt = c.getAttribute('data-cnt') || "";
-            let hex = (c.value || "").toLowerCase();
+            let hex = (c.value || "#ffffff").toLowerCase();
             
             w.push({ 
                 colourName: cleanBaseColorName(origName), 
-                color: origName || hex, 
+                origName: origName,
+                color: hex, 
                 hex: hex, 
                 count: cnt, 
                 ends: parseInt(e.value)||0, 
@@ -1772,11 +1710,12 @@ function getCurrentData() {
             let origName = c.getAttribute('data-orig') || c.getAttribute('data-name') || "";
             let shadeTag = c.getAttribute('data-tag') || "";
             let cnt = c.getAttribute('data-cnt') || "";
-            let hex = (c.value || "").toLowerCase();
+            let hex = (c.value || "#ffffff").toLowerCase();
             
             f.push({ 
                 colourName: cleanBaseColorName(origName), 
-                color: origName || hex, 
+                origName: origName,
+                color: hex, 
                 hex: hex, 
                 count: cnt, 
                 picks: parseInt(p.value)||0, 
@@ -1832,14 +1771,12 @@ async function saveCurrentDesign() {
         data.timestamp = new Date().toISOString();
         let cleanName = cleanDesignName(name);
 
-        // 1. LOCAL EDITS CACHE UPDATE
         try {
             let edits = JSON.parse(localStorage.getItem("local_edits_cache") || "{}");
-            edits[cleanName] = { ...(edits[cleanName] || {}), ...data };
+            edits[cleanName] = clone(data);
             localStorage.setItem("local_edits_cache", JSON.stringify(edits));
         } catch(e) {}
 
-        // 2. WARP ENTRY DATA UPDATE (Idhu thaan rombha mukkiyam - Refresh seiyum pothu maramal irukka)
         try {
             let warpDataArr = JSON.parse(localStorage.getItem("warp_entry_data") || "[]");
             let wIdx = warpDataArr.findIndex(w => cleanDesignName(designName(w)) === cleanName);
@@ -1851,7 +1788,6 @@ async function saveCurrentDesign() {
             localStorage.setItem("warp_entry_data", JSON.stringify(warpDataArr));
         } catch(e) {}
 
-        // 3. WEFT ENTRY DATA UPDATE
         try {
             let weftDataArr = JSON.parse(localStorage.getItem("weft_entry_data") || "[]");
             let fIdx = weftDataArr.findIndex(f => cleanDesignName(designName(f)) === cleanName);
@@ -1880,13 +1816,14 @@ async function saveCurrentDesign() {
         draw3DWeave(); 
 
         setStatus("✅ Saved Locally");
-        alert("✅ Design Local-il (Warp Entry utpada) வெற்றிகரமாக Save ஆகிவிட்டது!");
+        alert("✅ Design Local-il (Warp/Weft utpada) வெற்றிகரமாக Save ஆகிவிட்டது!");
 
-                // 4. CLOUD SAVE (USING CENTRALIZED SUPABASE SAVE)
         if (navigator.onLine && typeof window.supabaseSave === "function") {
             setTimeout(async () => {
                 try {
                     await window.supabaseSave("weave_designs", data);
+                    await window.supabaseSave("warp_entry_data", JSON.parse(localStorage.getItem("warp_entry_data") || "[]"));
+                    await window.supabaseSave("weft_entry_data", JSON.parse(localStorage.getItem("weft_entry_data") || "[]"));
                     setStatus("✅ Local & Cloud Saved!");
                 } catch (err) {
                     console.log("Cloud save failed:", err);
@@ -2004,8 +1941,6 @@ function isSeersuckerThread(colHex, origName, countVal){
 
 function getSimulationPicks(mRows, str){
     let seq = [];
-    // Some source modules may store pickPattern as an array. Normalize it
-    // before getPrintBracketMap() performs string operations.
     if (Array.isArray(str)) str = str.join(",");
     if (str == null) str = "";
     let rowB = getPrintBracketMap(str, false);
@@ -2115,10 +2050,15 @@ function draw3DWeave(){
             if(!co || !e){ w_idx++; continue; }
             
             const n = Math.max(0, parseInt(e.value) || 0); const span = Math.max(1, parseInt(sInp?.value) || 1); const repeat = Math.max(1, parseInt(rInp?.value) || 1);
-            const origStr = (co.getAttribute("data-orig") || "").toLowerCase(); const hexVal = (co.value || "").toLowerCase(); const cntStr = (co.getAttribute("data-cnt") || "").toLowerCase();
+            const origStr = (co.getAttribute("data-orig") || "").toLowerCase(); 
+            let hexVal = (co.value || "").toLowerCase();
+            if(!hexVal || hexVal === "#000000" || hexVal === "null") {
+                hexVal = colorName(origStr);
+            }
+            const cntStr = (co.getAttribute("data-cnt") || "").toLowerCase();
             const yInfo = parseYarnInfo(cntStr, origStr, hexVal);
             const isSeer = yInfo.isSpecialSeer || isSeersuckerThread(hexVal, origStr, cntStr);
-            const rgbColor = hexToRgb(co.value);
+            const rgbColor = hexToRgb(hexVal);
             
             if(span > 1 && repeat > 1){
                 const setSequence = []; const setSeerSeq = []; const setInfoSeq = [];
@@ -2126,8 +2066,12 @@ function draw3DWeave(){
                     const currIdx = w_idx + s; if(currIdx > currentWarpCount) break;
                     const rCo = $("wC"+currIdx); const rE = $("wE"+currIdx);
                     if(rCo && rE){
-                        const rN = Math.max(0, parseInt(rE.value) || 0); const rColor = hexToRgb(rCo.value);
-                        const rOrig = (rCo.getAttribute("data-orig") || "").toLowerCase(); const rHex = (rCo.value || "").toLowerCase(); const rCnt = (rCo.getAttribute("data-cnt") || "").toLowerCase();
+                        const rN = Math.max(0, parseInt(rE.value) || 0); 
+                        let rHex = (rCo.value || "").toLowerCase();
+                        const rOrig = (rCo.getAttribute("data-orig") || "").toLowerCase();
+                        if(!rHex || rHex === "#000000") rHex = colorName(rOrig);
+                        const rColor = hexToRgb(rHex);
+                        const rCnt = (rCo.getAttribute("data-cnt") || "").toLowerCase();
                         const rInfo = parseYarnInfo(rCnt, rOrig, rHex);
                         const rIsSeer = rInfo.isSpecialSeer || isSeersuckerThread(rHex, rOrig, rCnt);
                         for(let j = 0; j < rN; j++){ setSequence.push(rColor); setSeerSeq.push(rIsSeer); setInfoSeq.push(rInfo); }
@@ -2158,8 +2102,11 @@ function draw3DWeave(){
             
             const n = Math.max(0, parseInt(p.value) || 0); const span = Math.max(1, parseInt(sInp?.value) || 1); const repeat = Math.max(1, parseInt(rInp?.value) || 1);
             const cntStr = (co.getAttribute("data-cnt") || "").toLowerCase();
-            const yInfo = parseYarnInfo(cntStr, "", "");
-            const rgbColor = hexToRgb(co.value);
+            const origStr = (co.getAttribute("data-orig") || "").toLowerCase();
+            let hexVal = (co.value || "").toLowerCase();
+            if(!hexVal || hexVal === "#000000") hexVal = colorName(origStr);
+            const yInfo = parseYarnInfo(cntStr, "", hexVal);
+            const rgbColor = hexToRgb(hexVal);
             
             if(span > 1 && repeat > 1){
                 const setSequence = []; const setInfoSeq = [];
@@ -2167,9 +2114,13 @@ function draw3DWeave(){
                     const currIdx = f_idx + s; if(currIdx > currentWeftCount) break;
                     const rCo = $("weftC"+currIdx); const rP = $("weftP"+currIdx);
                     if(rCo && rP){
-                        const rN = Math.max(0, parseInt(rP.value) || 0); const rColor = hexToRgb(rCo.value);
+                        const rN = Math.max(0, parseInt(rP.value) || 0);
+                        let rHex = (rCo.value || "").toLowerCase();
+                        const rOrig = (rCo.getAttribute("data-orig") || "").toLowerCase();
+                        if(!rHex || rHex === "#000000") rHex = colorName(rOrig);
+                        const rColor = hexToRgb(rHex);
                         const rCnt = (rCo.getAttribute("data-cnt") || "").toLowerCase();
-                        const rInfo = parseYarnInfo(rCnt, "", "");
+                        const rInfo = parseYarnInfo(rCnt, "", rHex);
                         for(let j = 0; j < rN; j++){ setSequence.push(rColor); setInfoSeq.push(rInfo); }
                     }
                 }
@@ -2195,7 +2146,6 @@ function draw3DWeave(){
         const singleWarp = baseWarp.slice(); 
         const singleWeft = baseWeft.slice();
         
-        // REPEAT 1.25 DESIGN (1 Repeat + 25% extra) - FOR VISUAL SIMULATION
         const extraWarpCount = Math.max(1, Math.round(singleWarp.length * 0.25));
         const warp = [...singleWarp, ...singleWarp.slice(0, extraWarpCount)]; 
         const seerMap = [...warpSeerMap, ...warpSeerMap.slice(0, extraWarpCount)]; 
@@ -2215,7 +2165,6 @@ function draw3DWeave(){
         const physW_mm = (realWarpLength / reed) * 25.4; 
         const physH_mm = (realWeftLength / pick) * 25.4;
         
-        // EXACT 1 REPEAT DIMENSIONS FOR BLACK INFO BOX (STRICTLY 1 REPEAT)
         const singleWarpVal = singleWarp.length;
         const singleWeftVal = singleWeft.length;
         const singleW_mm = (singleWarpVal / reed) * 25.4;
@@ -2240,7 +2189,6 @@ function draw3DWeave(){
         
         const RULER = 32; 
 
-        // ================= EXACT STEEL RULER 1:1 CALIBRATION ENGINE =================
         const base_steel_ruler_px_per_mm = 6.29; 
         let px_per_mm = base_steel_ruler_px_per_mm * rulerCalibrationMultiplier;
 
@@ -2248,9 +2196,6 @@ function draw3DWeave(){
         
         const drawW = Math.round(physW_mm * px_per_mm); 
         const drawH = Math.round(physH_mm * px_per_mm);
-
-        const totalBlockW = drawW + RULER;
-        const totalBlockH = drawH + RULER;
         
         const left = -drawW / 2;
         const top = -drawH / 2;
@@ -2453,19 +2398,16 @@ function draw3DWeave(){
         const rulerBgColor = "#ffffff";
         const rulerBorderColor = "#475569";
 
-        // கீழ் ரூலர்
         ctx.fillStyle = rulerBgColor; 
         ctx.fillRect(left, bottom, drawW, RULER); 
         ctx.strokeStyle = rulerBorderColor; 
         ctx.lineWidth = 1;
         ctx.strokeRect(left, bottom, drawW, RULER);
 
-        // இடது செங்குத்து ரூலர் (Left Vertical Ruler - துணியை ஒட்டியே நிற்கும்)
         ctx.fillStyle = rulerBgColor; 
         ctx.fillRect(left - RULER, top, RULER, drawH);  
         ctx.strokeRect(left - RULER, top, RULER, drawH);
 
-        // மூலை சதுரம்
         ctx.fillStyle = "#f1f5f9";
         ctx.fillRect(left - RULER, bottom, RULER, RULER);         
         ctx.strokeRect(left - RULER, bottom, RULER, RULER);
@@ -2473,7 +2415,6 @@ function draw3DWeave(){
         ctx.fillStyle = "#0f172a"; 
         ctx.font = "bold 9px Arial, sans-serif"; 
 
-        // கிடைமட்ட ரூலர் எண்கள் (Horizontal CM)
         const total_mm_x = Math.round(physW_mm);
         ctx.textAlign = "center"; 
         ctx.textBaseline = "top";
@@ -2496,7 +2437,6 @@ function draw3DWeave(){
             }
         }
 
-        // இடது செங்குத்து ரூலர் எண்கள் (Vertical CM - Left Ruler)
         const total_mm_y = Math.round(physH_mm);
         ctx.textAlign = "right"; 
         ctx.textBaseline = "middle";
@@ -2525,7 +2465,6 @@ function draw3DWeave(){
         ctx.font = "bold 10px Arial, sans-serif";
         ctx.fillText("cm", left - RULER / 2, bottom + RULER / 2);
 
-        // BLACK BOX DISPLAY: STRICTLY 1 REPEAT ORIGINAL DIMENSIONS ONLY
         const line1 = `Original Width : ${physW_cm.toFixed(2)} cm (${singleW_mm.toFixed(1)} mm/rep)`;
         const line2 = `Original Height: ${physH_cm.toFixed(2)} cm (${singleH_mm.toFixed(1)} mm/rep)`;
 
@@ -2663,9 +2602,6 @@ window.addEventListener("focus", () => {
         importFromFirebase(false);
     }
 });
-// Weave 3D கேட்சை முழுமையாக நீக்க விரும்பினால் இதை ஒருமுறை இயக்கலாம்:
-// localStorage.removeItem("weave_designs_cache");
-// localStorage.removeItem("local_edits_cache");
 
 /* ================= SMART COLOR STUDIO LOGIC (60 TONES) ================= */
 function setToneFilter(tone, btn) {
@@ -2795,7 +2731,6 @@ function applySelectedColour() {
 
     function updateRowDisplay(inp, btn, disp, badge) {
         if(!inp) return;
-        // FIX: Original color name-ai maatramal appadiye vaitthirukka vendum
         let currentOrigName = inp.getAttribute("data-orig") || "";
         
         inp.value = newHex;
@@ -2812,7 +2747,6 @@ function applySelectedColour() {
             disp.title = `${rawOrigName} (${shadeTagText})`;
         }
     }
-
 
     if (isSync) {
         let oldHex = "";
@@ -2937,18 +2871,27 @@ async function executeRealA4Print() {
             const co = $("wC"+w_idx); const e = $("wE"+w_idx); const sInp = $("wSpan"+w_idx); const rInp = $("wRep"+w_idx);
             if(!co || !e){ w_idx++; continue; }
             const n = Math.max(0, parseInt(e.value) || 0); const span = Math.max(1, parseInt(sInp?.value) || 1); const repeat = Math.max(1, parseInt(rInp?.value) || 1);
-            const origStr = (co.getAttribute("data-orig") || "").toLowerCase(); const hexVal = (co.value || "").toLowerCase(); const cntStr = (co.getAttribute("data-cnt") || "").toLowerCase();
+            const origStr = (co.getAttribute("data-orig") || "").toLowerCase(); 
+            let hexVal = (co.value || "").toLowerCase();
+            if(!hexVal || hexVal === "#000000" || hexVal === "null") {
+                hexVal = colorName(origStr);
+            }
+            const cntStr = (co.getAttribute("data-cnt") || "").toLowerCase();
             const yInfo = parseYarnInfo(cntStr, origStr, hexVal);
             const isSeer = yInfo.isSpecialSeer || isSeersuckerThread(hexVal, origStr, cntStr);
-            const rgbColor = hexToRgb(co.value);
+            const rgbColor = hexToRgb(hexVal);
             if(span > 1 && repeat > 1){
                 const setSequence = []; const setSeerSeq = []; const setInfoSeq = [];
                 for(let s = 0; s < span; s++){
                     const currIdx = w_idx + s; if(currIdx > currentWarpCount) break;
                     const rCo = $("wC"+currIdx); const rE = $("wE"+currIdx);
                     if(rCo && rE){
-                        const rN = Math.max(0, parseInt(rE.value) || 0); const rColor = hexToRgb(rCo.value);
-                        const rOrig = (rCo.getAttribute("data-orig") || "").toLowerCase(); const rHex = (rCo.value || "").toLowerCase(); const rCnt = (rCo.getAttribute("data-cnt") || "").toLowerCase();
+                        const rN = Math.max(0, parseInt(rE.value) || 0); 
+                        let rHex = (rCo.value || "").toLowerCase();
+                        const rOrig = (rCo.getAttribute("data-orig") || "").toLowerCase();
+                        if(!rHex || rHex === "#000000") rHex = colorName(rOrig);
+                        const rColor = hexToRgb(rHex);
+                        const rCnt = (rCo.getAttribute("data-cnt") || "").toLowerCase();
                         const rInfo = parseYarnInfo(rCnt, rOrig, rHex);
                         const rIsSeer = rInfo.isSpecialSeer || isSeersuckerThread(rHex, rOrig, rCnt);
                         for(let j = 0; j < rN; j++){ setSequence.push(rColor); setSeerSeq.push(rIsSeer); setInfoSeq.push(rInfo); }
@@ -2971,24 +2914,33 @@ async function executeRealA4Print() {
                 w_idx++;
             }
         }
-
+        
         let baseWeft = []; let f_idx = 1; let baseWeftYarnInfo = [];
         while(f_idx <= currentWeftCount){
             const co = $("weftC"+f_idx); const p = $("weftP"+f_idx); const sInp = $("weftSpan"+f_idx); const rInp = $("weftRep"+f_idx);
             if(!co || !p){ f_idx++; continue; }
+            
             const n = Math.max(0, parseInt(p.value) || 0); const span = Math.max(1, parseInt(sInp?.value) || 1); const repeat = Math.max(1, parseInt(rInp?.value) || 1);
             const cntStr = (co.getAttribute("data-cnt") || "").toLowerCase();
-            const yInfo = parseYarnInfo(cntStr, "", "");
-            const rgbColor = hexToRgb(co.value);
+            const origStr = (co.getAttribute("data-orig") || "").toLowerCase();
+            let hexVal = (co.value || "").toLowerCase();
+            if(!hexVal || hexVal === "#000000") hexVal = colorName(origStr);
+            const yInfo = parseYarnInfo(cntStr, "", hexVal);
+            const rgbColor = hexToRgb(hexVal);
+            
             if(span > 1 && repeat > 1){
                 const setSequence = []; const setInfoSeq = [];
                 for(let s = 0; s < span; s++){
                     const currIdx = f_idx + s; if(currIdx > currentWeftCount) break;
                     const rCo = $("weftC"+currIdx); const rP = $("weftP"+currIdx);
                     if(rCo && rP){
-                        const rN = Math.max(0, parseInt(rP.value) || 0); const rColor = hexToRgb(rCo.value);
+                        const rN = Math.max(0, parseInt(rP.value) || 0);
+                        let rHex = (rCo.value || "").toLowerCase();
+                        const rOrig = (rCo.getAttribute("data-orig") || "").toLowerCase();
+                        if(!rHex || rHex === "#000000") rHex = colorName(rOrig);
+                        const rColor = hexToRgb(rHex);
                         const rCnt = (rCo.getAttribute("data-cnt") || "").toLowerCase();
-                        const rInfo = parseYarnInfo(rCnt, "", "");
+                        const rInfo = parseYarnInfo(rCnt, "", rHex);
                         for(let j = 0; j < rN; j++){ setSequence.push(rColor); setInfoSeq.push(rInfo); }
                     }
                 }
@@ -3032,9 +2984,6 @@ async function executeRealA4Print() {
 
         const physW_mm = (realWarpLength / reed) * 25.4;
         const physH_mm = (realWeftLength / pick) * 25.4;
-
-        const singleW_cm = ((singleWarp.length / reed) * 25.4) / 10;
-        const singleH_cm = ((singleWeft.length / pick) * 25.4) / 10;
 
         const base_steel_ruler_px_per_mm = 6.29;
         const printDpr = 2.0;
@@ -3164,7 +3113,7 @@ async function executeRealA4Print() {
                     if(curW >= 2.0) {
                         pCtx.fillStyle = "rgba(0, 0, 0, 0.25)";
                         const edgeW = Math.max(0.3, curW * 0.12);
-                        pCtx.fillRect(curX, y, edgeW, cellH);
+                        pCtx.fillRect(curX, y, curW, edgeW);
                         pCtx.fillRect(curX + curW - edgeW, y, edgeW, cellH);
                     }
                 }
@@ -3303,7 +3252,6 @@ async function executeRealA4Print() {
 
         const isPortrait = parseFloat(totalPrintH_cm) >= parseFloat(totalPrintW_cm);
 
-        // Native Printer moolam base64 image-ai print seiyyum murai
         if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Printer) {
             try {
                 await window.Capacitor.Plugins.Printer.print({
@@ -3322,7 +3270,6 @@ async function executeRealA4Print() {
                 closeCadPrintModal();
             }
         } else {
-            // Normal browser popup (fallback)
             const printWin = window.open("", "_blank", "width=950,height=1100");
             if (!printWin) {
                 closeCadPrintModal();
@@ -3582,7 +3529,6 @@ function buildDesignPrintContent() {
     `;
 }
 
-
 function printDesign() {
     try {
         const modal = $("printModalBox");
@@ -3619,7 +3565,6 @@ function closeGraphPrintPreview() {
     drawFramePending = false;
 }
 
-// Print mudithu thirumba app-kku varum pothu scroll matrum view unlock aaga
 window.addEventListener("afterprint", () => {
     document.body.style.overflow = "";
     drawFramePending = false;
@@ -3629,7 +3574,6 @@ window.addEventListener("afterprint", () => {
     }
 });
 
-// Android print preview sheet-il irundhu back vandhadhum auto-unlock aaga
 window.addEventListener("focus", () => {
     setTimeout(() => {
         document.body.style.overflow = "";
@@ -3644,7 +3588,6 @@ async function triggerRealPrint() {
     const wasFsOpen = fs && fs.style.display === "flex";
     if (wasFsOpen) fs.style.display = "none";
 
-    // Capacitor Native Printer check
     if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Printer) {
         try {
             const printContent = $("printDesignContent").innerHTML;
@@ -3660,11 +3603,9 @@ async function triggerRealPrint() {
             window.print();
         }
     } else {
-        // Browser fallback
         window.print();
     }
 
-    // Print dialogue mudindhavudan scroll & display unlock
     setTimeout(() => {
         document.body.style.overflow = wasFsOpen ? "hidden" : "";
         drawFramePending = false;
@@ -3691,7 +3632,6 @@ function getPrintBracketMap(str, isCol=false) {
     if(!str) return {map, skip, isTop, isBot};
     let s = str.toLowerCase().replace(/\s+/g, '').replace(/[x×X*]/g, '*');
     let parts = s.split(',');
-    let currentIdx = 1;
     
     for(let p of parts) {
         let match = /(?:\()?(\d+)-(\d+)(?:\))?\*(\d+)/.exec(p);
@@ -3761,7 +3701,6 @@ function buildPrintGraph(m, pickStr) {
     return html;
 }
 
-// Immediate execution loader
 (function() {
     try {
         let combinedDesigns = [];
@@ -3790,14 +3729,8 @@ function buildPrintGraph(m, pickStr) {
             allCloudDesigns = [{
                 designNo: "",
                 name: "",
-                warpLines: [
-                    { color: "" },
-                    { color: "" }
-                ],
-                weftLines: [
-                    { color: "" },
-                    { color: "" }
-                ]
+                warpLines: [{ color: "" }, { color: "" }],
+                weftLines: [{ color: "" }, { color: "" }]
             }];
         }
     } catch (err) {
