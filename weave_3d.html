@@ -2576,9 +2576,26 @@ function applySelectedColour() {
     const target = colourPopupTarget;
     let newHex = selectedColourForPopup.hex.toLowerCase(); 
     let shadeTagText = selectedColourForPopup.shadeTag || "T-01";
+    let isSyncChecked = $("syncColorCheck")?.checked ?? false;
 
-    function updateRowDisplay(inp, btn, disp) {
+    // எதை மாற்ற வேண்டும் என்பதைத் தீர்மானிக்க target.type (warp அல்லது weft) எடுக்கப்படுகிறது
+    let isWarp = (target.type === "warp");
+    let count = isWarp ? currentWarpCount : currentWeftCount;
+    let prefix = isWarp ? "w" : "weft";
+    let btnPrefix = isWarp ? "wBtn" : "weftBtn";
+    let nameDispPrefix = isWarp ? "wNameDisp" : "weftNameDisp";
+
+    // முதலில் க்ளிக் செய்த குறிப்பிட்ட வரியின் பழைய கலர்/பெயரைக் கண்டறியவும்
+    let targetInp = $(prefix + "C" + target.index);
+    let targetOldHex = targetInp ? (targetInp.value || "").toLowerCase() : "";
+    let targetOldOrig = targetInp ? (targetInp.getAttribute("data-orig") || "").toLowerCase() : "";
+
+    function updateRowDisplay(idx) {
+        let inp = $(prefix + "C" + idx);
+        let btn = $(btnPrefix + idx);
+        let disp = $(nameDispPrefix + idx);
         if(!inp) return;
+        
         let currentOrigName = inp.getAttribute("data-orig") || "";
         
         inp.value = newHex;
@@ -2596,11 +2613,25 @@ function applySelectedColour() {
         }
     }
 
-    // Target index அடிப்படையில் சம்பந்தப்பட்ட அந்த ஒரு வரிக்கு மட்டும் கலர் மற்றும் ஷேட் மாறும் (மற்ற கலர்களை பாதிக்காது)
-    if(target.type === "warp" && target.index) { 
-        updateRowDisplay($("wC" + target.index), $("wBtn" + target.index), $("wNameDisp" + target.index));
-    } else if(target.type === "weft" && target.index) { 
-        updateRowDisplay($("weftC" + target.index), $("weftBtn" + target.index), $("weftNameDisp" + target.index));
+    if (isSyncChecked) {
+        // Sync ஆன் செய்யப்பட்டிருந்தால்: அதே நிறம் (Color/Hex) அல்லது பெயர் உள்ள அனைத்து வரிகளிலும் இந்த புதிய ஷேட் மாறும்
+        for (let i = 1; i <= count; i++) {
+            let rowInp = $(prefix + "C" + i);
+            if (rowInp) {
+                let rowHex = (rowInp.value || "").toLowerCase();
+                let rowOrig = (rowInp.getAttribute("data-orig") || "").toLowerCase();
+                
+                // பழைய கலர் ஹெக்ஸ் (Hex) அல்லது ஒரிஜினல் பெயர் பொருந்தினால் அனைத்திலும் மாறும்
+                if (rowHex === targetOldHex || (targetOldOrig && rowOrig === targetOldOrig)) {
+                    updateRowDisplay(i);
+                }
+            }
+        }
+    } else {
+        // Sync ஆஃப் செய்யப்பட்டிருந்தால்: குறிப்பிட்ட அந்த ஒரு வரிக்கு மட்டும் மாறும்
+        if (target.index) {
+            updateRowDisplay(target.index);
+        }
     }
     
     autoRefresh3D(); 
