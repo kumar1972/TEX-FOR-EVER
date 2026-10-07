@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="ta">
 <head>
 <meta charset="UTF-8">
@@ -9,8 +10,6 @@
 <meta name="theme-color" content="#0d1713">
 <title>3D Warp & Weft Weave Simulator Pro</title>
 
-<script src="config.js"></script>
-<script src="translator.js"></script>
 <!-- Supabase SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -348,7 +347,7 @@ input, select {
     flex-shrink: 0;
 }
 
-/* CAD PRINT MODAL - ஆரம்பத்தில் சரியாக மறைந்திருக்க வேண்டும் */
+/* CAD PRINT MODAL */
 .cad-print-modal {
     display: none;
     position: fixed;
@@ -370,18 +369,24 @@ input, select {
     color: #edf7ef;
 }
 
-/* PRINT DESIGN MODAL - ஆரம்பத்தில் சரியாக மறைந்திருக்க வேண்டும் */
-.print-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: #ffffff;
-    z-index: 1000000;
-    justify-content: center;
-    align-items: center;
-    padding: 12px;
-}
-.print-sheet { background:#fff; color:#101615; width:100%; max-width:860px; max-height:96vh; overflow:auto; border-radius:14px; box-shadow:0 22px 70px rgba(0,0,0,.45); border:1px solid #789485; }
+/* PRINT DESIGN MODAL RE-STYLING (Matching Image) */
+.print-modal { display: none; position: fixed; inset: 0; background: #e5e7eb; z-index: 1000000; justify-content: center; align-items: flex-start; padding: 20px; overflow-y: auto; }
+.print-sheet { background: #fff; color: #111827; width: 100%; max-width: 860px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: none; overflow: hidden; margin: auto; }
+.print-sheet-inner { padding: 20px; background: #fff; }
+
+.print-section-title { display: flex; justify-content: space-between; align-items: flex-end; font-size: 13px; font-weight: 900; color: #111827; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 12px; margin-top: 24px; }
+.section-code { font-size: 9px; font-weight: 700; color: #6b7280; text-transform: uppercase; }
+
+.yarn-table { width: 100%; border-collapse: collapse; font-size: 11px; font-family: sans-serif; }
+.yarn-table th { background: #f9fafb; border: 1px solid #e5e7eb; padding: 10px 4px; color: #374151; font-weight: 800; text-align: center; }
+.yarn-table td { border: 1px solid #e5e7eb; padding: 8px 4px; text-align: center; vertical-align: middle; }
+.color-swatch { width: 18px; height: 18px; border-radius: 4px; border: 1px solid #d1d5db; display: inline-block; vertical-align: middle; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+.denting-box { font-size: 12px; font-weight: 900; text-align: center; padding: 12px; border: 1px solid #d1d5db; background: #f9fafb; border-radius: 6px; color: #111827; }
+
+.print-graph-table { border-collapse: collapse; margin: 0 auto; }
+.print-graph-table td { width: var(--gcell, 18px); height: var(--gcell, 18px); text-align: center; font-size: var(--gfont, 14px); font-weight: 900; color: #111; border: 1px solid #d1d5db; }
+.graph-axis { font-size: 10px !important; color: #6b7280 !important; border: none !important; }
 
 /* SMART COLOR STUDIO POPUP */
 .colour-popup { display: none; position: fixed; inset: 0; z-index: 9999999; background: #14251e; flex-direction: column; padding: 10px; overflow: hidden; }
@@ -588,25 +593,6 @@ input, select {
 <!-- PROFESSIONAL DESIGN SHEET PRINT PREVIEW -->
 <div id="printModalBox" class="print-modal">
     <div class="print-sheet">
-        <div class="print-toolbar print-hide">
-            <div>
-                <div class="print-toolbar-title">🖨️ Professional Design Sheet</div>
-                <div class="print-toolbar-sub">A4 • One Page • Drawing + Denting + Weave Graph</div>
-            </div>
-            <div class="print-toolbar-actions">
-                <select id="printOrientation" aria-label="Page orientation" onchange="updatePrintOrientation()">
-                    <option value="portrait">A4 Portrait</option>
-                    <option value="landscape">A4 Landscape</option>
-                </select>
-                <select id="printGraphScale" aria-label="Graph size" onchange="applyPrintGraphScale()">
-                    <option value="small">Graph Small</option>
-                    <option value="medium" selected>Graph Medium</option>
-                    <option value="large">Graph Large</option>
-                </select>
-                <button type="button" class="print-preview-only" onclick="triggerRealPrint()">🖨 PRINT</button>
-                <button type="button" class="print-close" onclick="closeGraphPrintPreview()">✕ CLOSE</button>
-            </div>
-        </div>
         <div class="print-sheet-inner">
             <div id="printDesignContent"></div>
         </div>
@@ -663,6 +649,10 @@ let liveDesignDimensions = { widthCm: 0, heightCm: 0 };
 let selectedCadScalePercent = 100;
 
 let rulerCalibrationMultiplier = 1.0;
+let singleW_cm = 0;
+let singleH_cm = 0;
+let singleW_mm = 0;
+let singleH_mm = 0;
 try {
     rulerCalibrationMultiplier = parseFloat(localStorage.getItem("weave_ruler_cal") || "1.0");
 } catch(e) {}
@@ -1241,7 +1231,7 @@ function populateDesignSelect(auto = true) {
     if (allCloudDesigns.length > 0) {
         let targetName = designName(allCloudDesigns[0]);
         if (cur) {
-            let found = allCloudDesigns.find(d => cleanDesignName(designName(d)) === cleanDesignName(cur));
+            let found = allCloudDesigns.find(d => cleanDesignName(designName(d)) === cleanName(cur));
             if (found) targetName = designName(found);
         }
 
@@ -1966,11 +1956,13 @@ function draw3DWeave(){
         
         const singleWarpVal = singleWarp.length;
         const singleWeftVal = singleWeft.length;
-        const singleW_mm = (singleWarpVal / reed) * 25.4;
-        const singleH_mm = (singleWeftVal / pick) * 25.4;
-        const physW_cm = singleW_mm / 10;
-        const physH_cm = singleH_mm / 10;
-        liveDesignDimensions = { widthCm: physW_cm, heightCm: physH_cm };
+        singleW_mm = (singleWarpVal / reed) * 25.4;
+        singleH_mm = (singleWeftVal / pick) * 25.4;
+        singleW_cm = singleW_mm / 10;
+        singleH_cm = singleH_mm / 10;
+        const physW_cm = singleW_cm;
+        const physH_cm = singleH_cm;
+        liveDesignDimensions = { widthCm: physW_cm, heightCm: physH_cm, singleW_cm: singleW_cm, singleH_cm: singleH_cm, singleW_mm: singleW_mm, singleH_mm: singleH_mm };
         
         let rawDent = $("dentingPatternInput")?.value || activeDesignObj?.dentingPatternFormula || activeDesignObj?.dentingPattern || "2";
         let rawDraw = $("drawingPatternInput")?.value || activeDesignObj?.drawingPatternFormula || activeDesignObj?.drawingPattern || "1,2,3,4";
@@ -3289,40 +3281,48 @@ function buildDesignPrintContent() {
     try { weftTotal = calculateYarnDetails("weft").totalYarns; } catch(e) {}
 
     let now = new Date();
-    let stamp = now.toLocaleDateString() + " • " + now.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+    let stamp = now.toLocaleDateString('en-GB') + " - " + now.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}); 
 
     let warpTableHTML = buildWarpTable(data.warpLines);
 
     return `
-        <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid #173d2d; padding-bottom:6px; margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #e2e8f0; padding-bottom:12px; margin-bottom:16px;">
             <div>
-                <div style="font-size:16px; font-weight:950; color:#153c2c; letter-spacing:0.5px; margin-bottom:2px;">TEXFOREVER <span style="font-size:10px; color:#596861; font-weight:700;">| DESIGN SHEET — ${escapeColourText(dName)}</span></div>
-                <div style="font-size:7px; font-weight:800; color:#63736c; letter-spacing:0.5px;">WARPING PLAN • DRAWING ORDER • WEAVE GRAPH</div>
+                <div style="font-size:18px; font-weight:900; color:#111827; margin-bottom:4px; text-transform: uppercase;">TEXFOREVER <span style="font-size:12px; font-weight:600; color:#6b7280; text-transform:none;">| DESIGN SHEET — ${escapeColourText(dName)}</span></div>
+                <div style="font-size:8px; font-weight:800; color:#6b7280; letter-spacing:0.5px; text-transform: uppercase;">WARPING PLAN • DRAWING ORDER • WEAVE GRAPH</div>
             </div>
-            <div style="text-align:right; font-size:10px; font-weight:900; color:#153c2c;">
-                <span style="display:inline-block; border:1px solid #c9d4ce; padding:3px 6px; border-radius:4px; margin-right:4px;">WARP ENDS: <span style="color:#2d9148;">${warpTotal || 0}</span></span>
-                <span style="display:inline-block; border:1px solid #c9d4ce; padding:3px 6px; border-radius:4px;">WEFT PICKS: <span style="color:#2d9148;">${weftTotal || 0}</span></span>
+            <div style="display:flex; flex-direction:column; gap:6px; text-align:right; font-size:10px; font-weight:900; color:#153c2c;">
+                <div style="border:1px solid #a3e6cd; background:#e6fcf5; padding:4px 8px; border-radius:4px; letter-spacing:0.5px;">WARP ENDS: <span style="color:#047857;">${warpTotal || 0}</span></div>
+                <div style="border:1px solid #a3e6cd; background:#e6fcf5; padding:4px 8px; border-radius:4px; letter-spacing:0.5px;">WEFT PICKS: <span style="color:#047857;">${weftTotal || 0}</span></div>
             </div>
         </div>
 
-        <div class="print-page-grid">
+        <div class="print-page-grid" style="display:flex; flex-direction:column; gap:0;">
             <div class="print-col">
-                <div class="print-section-title" style="margin-top:0;">🧵 WARPING & DRAWING PLAN <span class="section-code">WARP SEQUENCE</span></div>
+                <div class="print-section-title" style="margin-top:0;">
+                    <span>🧵 WARPING & DRAWING PLAN</span>
+                    <span class="section-code">WARP SEQUENCE</span>
+                </div>
                 ${warpTableHTML}
             </div>
             
             <div class="print-col">
-                <div class="print-section-title" style="margin-top:0;">📊 WEAVE GRAPH <span class="section-code">${m.length} ×${m[0].length} REPEAT</span></div>
-                <div class="print-graph-wrap" style="margin-bottom:15px;">${buildPrintGraph(m, pickStr)}</div>
+                <div class="print-section-title">
+                    <span>📊 WEAVE GRAPH</span>
+                    <span class="section-code">${m.length} × ${m[0].length} REPEAT</span>
+                </div>
+                <div class="print-graph-wrap" style="margin-bottom:15px; display:flex; justify-content:center;">${buildPrintGraph(m, pickStr)}</div>
                 
-                <div class="print-section-title">📐 DENTING PATTERN</div>
-                <div style="font-size:10px; font-weight:900; text-align:center; padding: 8px; border:1px solid #9caea4; background:#f8faf9; border-radius:4px; margin-bottom:10px;">
+                <div class="print-section-title">
+                    <span>📐 DENTING PATTERN</span>
+                </div>
+                <div class="denting-box">
                     ${escapeColourText(dentArr.join(", "))} Ends / Dent
                 </div>
             </div>
         </div>
 
-        <div class="print-footer">
+        <div class="print-footer" style="display:flex; justify-content:space-between; margin-top:20px; padding-top:10px; border-top:1px solid #e2e8f0; font-size:8px; color:#9ca3af; font-weight:600;">
             <span>TEXFOREVER • Technical Reference Copy</span>
             <span>Generated: ${stamp}</span>
         </div>
@@ -3471,9 +3471,9 @@ function buildPrintGraph(m, pickStr) {
         html += `<tr><td class="graph-axis">${rowNum}</td>`;
         
         for(let c=0; c<m[r].length; c++) {
-            let bTop = rowB.isTop[rowNum] ? "2.5px solid #000" : "1px solid #3f4d46";
-            let bBot = rowB.isBot[rowNum] ? "2.5px solid #000" : "1px solid #3f4d46";
-            let borderStyle = `border-top:${bTop}; border-bottom:${bBot}; border-left:1px solid #3f4d46; border-right:1px solid #3f4d46;`;
+            let bTop = rowB.isTop[rowNum] ? "2.5px solid #000" : "1px solid #d1d5db";
+            let bBot = rowB.isBot[rowNum] ? "2.5px solid #000" : "1px solid #d1d5db";
+            let borderStyle = `border-top:${bTop}; border-bottom:${bBot}; border-left:1px solid #d1d5db; border-right:1px solid #d1d5db;`;
             
             html += `<td style="${borderStyle}">${m[r][c] ? "×" : ""}</td>`;
         }
@@ -3544,7 +3544,7 @@ function buildPrintGraph(m, pickStr) {
             }];
         }
     } catch (err) {
-        console.error("Preload Error:", err);
+        console.error("PreloadError:", err);
     }
 })();
 
