@@ -2585,6 +2585,7 @@ function closeColourPopup() {
         popup.style.display = "none";
     }
 }
+
 function applySelectedColour() {
     if(!selectedColourForPopup) { closeColourPopup(); return; }
     const target = colourPopupTarget;
@@ -2598,12 +2599,12 @@ function applySelectedColour() {
         let disp = $(nameDispPrefix + idx);
         if(!inp) return;
         
-        // 🔴 இதுதான் திருத்தம்: பழைய ஒரிஜினல் பெயரை எந்தக் காரணத்தைக் கொண்டும் மாற்றக்கூடாது!
+        // 🔴 பழைய ஒரிஜினல் பெயரை எடுக்கிறோம். இதை எக்காரணம் கொண்டும் மாற்றக்கூடாது!
         let currentOrigName = inp.getAttribute("data-orig") || inp.getAttribute("data-name") || "";
         
         inp.value = newHex;
         inp.setAttribute("data-tag", shadeTagText);
-        // data-orig -ஐ ஓவர்ரைட் செய்யும் கோடு நீக்கப்பட்டுவிட்டது
+        // 🔴 data-orig அல்லது data-name-ஐ overwrite செய்யும் கோடு முழுமையாக நீக்கப்பட்டுவிட்டது!
         
         if (btn) btn.style.background = newHex;
         if (disp) {
@@ -2621,19 +2622,56 @@ function applySelectedColour() {
     let targetInp = $(targetPrefix + "C" + target.index);
     if (!targetInp) return;
 
+    // 🔴 Sync செய்வதற்காக, க்ளிக் செய்த வரியின் ஒரிஜினல் பெயரை எடுக்கிறோம்
+    let targetOldOrig = (targetInp.getAttribute("data-orig") || "").toLowerCase().trim();
+    let targetOldName = (targetInp.getAttribute("data-name") || "").toLowerCase().trim();
+    let matchKeyOrig = targetOldOrig || targetOldName;
     let targetOldHex = (targetInp.value || "").toLowerCase();
 
     if (isSyncChecked) {
+        // Warp வரிகளைச் சரிபார்த்தல்
         for (let i = 1; i <= currentWarpCount; i++) {
             let rowInp = $("wC" + i);
-            if (rowInp && (rowInp.value || "").toLowerCase() === targetOldHex) {
-                updateRowDisplay("w", "wBtn", "wNameDisp", i);
+            if (rowInp) {
+                let rowOrig = (rowInp.getAttribute("data-orig") || "").toLowerCase().trim();
+                let rowName = (rowInp.getAttribute("data-name") || "").toLowerCase().trim();
+                let rowKeyOrig = rowOrig || rowName;
+                let rowHex = (rowInp.value || "").toLowerCase();
+
+                // 🔴 அசல் பெயர் (Original Name) ஒன்றாக இருந்தால் மட்டுமே மாற்ற வேண்டும்! (Hex-ஐ வைத்து மட்டும் செக் செய்யக்கூடாது)
+                let isMatch = false;
+                if (matchKeyOrig && rowKeyOrig === matchKeyOrig) {
+                    isMatch = true;
+                } else if (!matchKeyOrig && rowHex === targetOldHex) {
+                    // பெயர் இல்லையென்றால் மட்டுமே Hex-ஐ வைத்து மேட்ச் செய்கிறோம்
+                    isMatch = true;
+                }
+
+                if (isMatch) {
+                    updateRowDisplay("w", "wBtn", "wNameDisp", i);
+                }
             }
         }
+        
+        // Weft வரிகளைச் சரிபார்த்தல்
         for (let i = 1; i <= currentWeftCount; i++) {
             let rowInp = $("weftC" + i);
-            if (rowInp && (rowInp.value || "").toLowerCase() === targetOldHex) {
-                updateRowDisplay("weft", "weftBtn", "weftNameDisp", i);
+            if (rowInp) {
+                let rowOrig = (rowInp.getAttribute("data-orig") || "").toLowerCase().trim();
+                let rowName = (rowInp.getAttribute("data-name") || "").toLowerCase().trim();
+                let rowKeyOrig = rowOrig || rowName;
+                let rowHex = (rowInp.value || "").toLowerCase();
+
+                let isMatch = false;
+                if (matchKeyOrig && rowKeyOrig === matchKeyOrig) {
+                    isMatch = true;
+                } else if (!matchKeyOrig && rowHex === targetOldHex) {
+                    isMatch = true;
+                }
+
+                if (isMatch) {
+                    updateRowDisplay("weft", "weftBtn", "weftNameDisp", i);
+                }
             }
         }
     } else {
@@ -2647,7 +2685,6 @@ function applySelectedColour() {
     autoRefresh3D(); 
     closeColourPopup();
 }
-
 
 
 function openColourPickerForEntry(type, index) {
