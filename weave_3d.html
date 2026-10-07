@@ -34,6 +34,52 @@ function $(id) {
 }
 </script>
 <style>
+  /* Print control bar container - Single line alignment */
+.print-controls-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 16px;
+    gap: 8px;
+    flex-wrap: nowrap;
+}
+
+.print-controls-bar select, 
+.print-controls-bar button {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #334155;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.print-controls-bar button.btn-print-action {
+    background: #10b981;
+    color: #fff;
+    border-color: #059669;
+}
+
+.print-controls-bar button.btn-close-action {
+    background: #ef4444;
+    color: #fff;
+    border-color: #dc2626;
+}
+
+/* Hide controls bar completely during printing */
+@media print {
+    .print-controls-bar, .print-hide {
+        display: none !important;
+    }
+}
+
 /* ================= GLOBAL STYLES ================= */
 :root {
     --bg: #0d1713;
@@ -590,11 +636,34 @@ input, select {
     </div>
 </div>
 
-<!-- PROFESSIONAL DESIGN SHEET PRINT PREVIEW -->
+<!-- PROFESSIONAL DESIGN SHEET PRINT PREVIEW (Correctly placed as separate modal) -->
 <div id="printModalBox" class="print-modal">
     <div class="print-sheet">
         <div class="print-sheet-inner">
+            
+            <!-- Controls Bar (Single line, hidden during print) -->
+            <div class="print-controls-bar">
+                <div style="font-size:11px; font-weight:900; color:#1e293b;">🖨️ Professional Design Sheet</div>
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <select id="printOrientation" onchange="updatePrintOrientation()">
+                        <option value="portrait">A4 Portrait</option>
+                        <option value="landscape">A4 Landscape</option>
+                    </select>
+                    
+                    <select id="printGraphScale" onchange="applyPrintGraphScale()">
+                        <option value="small">Graph Small</option>
+                        <option value="medium" selected>Graph Medium</option>
+                        <option value="large">Graph Large</option>
+                    </select>
+                    
+                    <button class="btn-print-action" onclick="triggerRealPrint()">🖨️ PRINT</button>
+                    <button class="btn-close-action" onclick="closeGraphPrintPreview()">✕ CLOSE</button>
+                </div>
+            </div>
+
+            <!-- Dynamic Design Sheet Content -->
             <div id="printDesignContent"></div>
+            
         </div>
     </div>
 </div>
@@ -2757,7 +2826,7 @@ async function executeRealA4Print() {
 
         const extraWeftCount = Math.max(1, Math.round(singleWeft.length * 0.25));
         const weft = [...singleWeft, ...singleWeft.slice(0, extraWeftCount)];
-        const weftYarnInfos = [...baseWeftYarnInfo, ...baseWeftYarnInfo.slice(0, extraWeftCount)];
+        const weftYarnInfos = [...baseWeftYarnInfo, ...baseWeftYarnInfo.slice(0, extraWarpCount)];
 
         const realWarpLength = warp.length;
         const realWeftLength = weft.length;
