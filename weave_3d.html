@@ -2576,7 +2576,6 @@ function applySelectedColour() {
     const target = colourPopupTarget;
     let newHex = selectedColourForPopup.hex.toLowerCase(); 
     let shadeTagText = selectedColourForPopup.shadeTag || "T-01";
-    let isSync = $("syncColorCheck")?.checked ?? true;
 
     function updateRowDisplay(inp, btn, disp) {
         if(!inp) return;
@@ -2584,13 +2583,10 @@ function applySelectedColour() {
         
         inp.value = newHex;
         inp.setAttribute("data-tag", shadeTagText);
-        if (selectedColourForPopup.name) {
-            inp.setAttribute("data-orig", selectedColourForPopup.baseName || currentOrigName);
-        }
-
+        
         if (btn) btn.style.background = newHex;
         if (disp) {
-            let rawOrigName = getLocalizedColorName(selectedColourForPopup.baseName || currentOrigName) || currentOrigName || "Custom";
+            let rawOrigName = getLocalizedColorName(currentOrigName) || currentOrigName || "Custom";
             let cnt = inp.getAttribute("data-cnt") || "";
             let countPrefix = cnt ? `<span style="color:#f59e0b; font-size:0.72rem; font-weight:bold; margin-right:5px;">[${escapeColourText(cnt)}]</span>` : "";
             let tagBadge = `<span style="background:#2563eb;color:#fff;padding:1px 4px;border-radius:3px;font-size:0.58rem;margin-left:4px;">${shadeTagText}</span>`;
@@ -2600,58 +2596,13 @@ function applySelectedColour() {
         }
     }
 
-    if (isSync) {
-        let oldHex = "";
-        let oldName = "";
-        if (target.type === "warp" && target.index) {
-            let input = $("wC" + target.index);
-            if (input) {
-                oldHex = input.value.toLowerCase();
-                oldName = cleanBaseColorName(input.getAttribute("data-orig") || "").toLowerCase();
-            }
-        } else if (target.type === "weft" && target.index) {
-            let input = $("weftC" + target.index);
-            if (input) {
-                oldHex = input.value.toLowerCase();
-                oldName = cleanBaseColorName(input.getAttribute("data-orig") || "").toLowerCase();
-            }
-        }
-
-        for (let i = 1; i <= currentWarpCount; i++) {
-            let inp = $("wC" + i);
-            let btn = $("wBtn" + i);
-            let disp = $("wNameDisp" + i);
-            if (inp) {
-                let curHex = inp.value.toLowerCase();
-                let curName = cleanBaseColorName(inp.getAttribute("data-orig") || "").toLowerCase();
-                if ((oldName && curName === oldName) || (!oldName && curHex === oldHex)) {
-                    updateRowDisplay(inp, btn, disp);
-                }
-            }
-        }
-
-        for (let i = 1; i <= currentWeftCount; i++) {
-            let inp = $("weftC" + i);
-            let btn = $("weftBtn" + i);
-            let disp = $("weftNameDisp" + i);
-            if (inp) {
-                let curHex = inp.value.toLowerCase();
-                let curName = cleanBaseColorName(inp.getAttribute("data-orig") || "").toLowerCase();
-                if ((oldName && curName === oldName) || (!oldName && curHex === oldHex)) {
-                    updateRowDisplay(inp, btn, disp);
-                }
-            }
-        }
-    } else {
-        if(target.type==="warp" && target.index) { 
-            updateRowDisplay($("wC"+target.index), $("wBtn"+target.index), $("wNameDisp"+target.index));
-        }
-        if(target.type==="weft" && target.index) { 
-            updateRowDisplay($("weftC"+target.index), $("weftBtn"+target.index), $("weftNameDisp"+target.index));
-        }
+    // Target index அடிப்படையில் சம்பந்தப்பட்ட அந்த ஒரு வரிக்கு மட்டும் கலர் மற்றும் ஷேட் மாறும் (மற்ற கலர்களை பாதிக்காது)
+    if(target.type === "warp" && target.index) { 
+        updateRowDisplay($("wC" + target.index), $("wBtn" + target.index), $("wNameDisp" + target.index));
+    } else if(target.type === "weft" && target.index) { 
+        updateRowDisplay($("weftC" + target.index), $("weftBtn" + target.index), $("weftNameDisp" + target.index));
     }
     
-    // Auto-update state and cache immediately without removing any existing logic
     autoRefresh3D(); 
     closeColourPopup();
 }
