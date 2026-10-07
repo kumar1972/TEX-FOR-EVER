@@ -635,37 +635,48 @@ input, select {
         </div>
     </div>
 </div>
-<!-- Controls Bar (Single line, hidden during print) -->
-<div class="print-controls-bar">
-    <div style="font-size:11px; font-weight:900; color:#1e293b;">🖨️ Professional Design Sheet</div>
-    <div style="display:flex; align-items:center; gap:10px;">
-        
-        <!-- Page Orientation Dropdown with Label -->
-        <div style="display:flex; align-items:center; gap:4px;">
-            <span style="font-size:10px; font-weight:800; color:#64748b;">📄 Page:</span>
-            <select id="printOrientation" onchange="updatePrintOrientation()">
-                <option value="portrait">A4 Portrait</option>
-                <option value="landscape">A4 Landscape</option>
-            </select>
+<!-- PROFESSIONAL DESIGN SHEET PRINT PREVIEW -->
+<div id="printModalBox" class="print-modal">
+    <div class="print-sheet">
+        <div class="print-sheet-inner">
+            
+            <!-- Controls Bar (Single line, hidden during print) -->
+            <div class="print-controls-bar">
+                <div style="font-size:11px; font-weight:900; color:#1e293b;">🖨️ Professional Design Sheet</div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    
+                    <!-- Page Orientation Dropdown with Label -->
+                    <div style="display:flex; align-items:center; gap:4px;">
+                        <span style="font-size:10px; font-weight:800; color:#64748b;">📄 Page:</span>
+                        <select id="printOrientation" onchange="updatePrintOrientation()">
+                            <option value="portrait">A4 Portrait</option>
+                            <option value="landscape">A4 Landscape</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Graph Scale Dropdown with Label -->
+                    <div style="display:flex; align-items:center; gap:4px;">
+                        <span style="font-size:10px; font-weight:800; color:#64748b;">📊 Graph:</span>
+                        <select id="printGraphScale" onchange="applyPrintGraphScale()">
+                            <option value="small">Small</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="large">Large</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn-print-action" onclick="triggerRealPrint()">🖨️ PRINT</button>
+                    <button class="btn-close-action" onclick="closeGraphPrintPreview()">✕ CLOSE</button>
+                </div>
+            </div>
+
+            <!-- Dynamic Design Sheet Content -->
+            <div id="printDesignContent"></div>
+            
         </div>
-        
-        <!-- Graph Scale Dropdown with Label -->
-        <div style="display:flex; align-items:center; gap:4px;">
-            <span style="font-size:10px; font-weight:800; color:#64748b;">📊 Graph:</span>
-            <select id="printGraphScale" onchange="applyPrintGraphScale()">
-                <option value="small">Small</option>
-                <option value="medium" selected>Medium</option>
-                <option value="large">Large</option>
-            </select>
-        </div>
-        
-        <button class="btn-print-action" onclick="triggerRealPrint()">🖨️ PRINT</button>
-        <button class="btn-close-action" onclick="closeGraphPrintPreview()">✕ CLOSE</button>
     </div>
 </div>
 
-
-            <!-- Dynamic Design Sheet Content -->
+  <!-- Dynamic Design Sheet Content -->
             <div id="printDesignContent"></div>
             
         </div>
@@ -2574,33 +2585,29 @@ function closeColourPopup() {
         popup.style.display = "none";
     }
 }
-
 function applySelectedColour() {
     if(!selectedColourForPopup) { closeColourPopup(); return; }
     const target = colourPopupTarget;
     let newHex = selectedColourForPopup.hex.toLowerCase(); 
     let shadeTagText = selectedColourForPopup.shadeTag || "T-01";
     let isSyncChecked = $("syncColorCheck")?.checked ?? false;
-    
-    // புதிய கலரின் ஒரிஜினல் பெயரை எடுக்கிறோம்
-    let newBaseName = selectedColourForPopup.baseName || selectedColourForPopup.name || "";
 
-    // Warp அல்லது Weft - வரியை அப்டேட் செய்வதற்கான பொதுவான Function
     function updateRowDisplay(prefix, btnPrefix, nameDispPrefix, idx) {
         let inp = $(prefix + "C" + idx);
         let btn = $(btnPrefix + idx);
         let disp = $(nameDispPrefix + idx);
         if(!inp) return;
         
+        // 🔴 இதுதான் திருத்தம்: பழைய ஒரிஜினல் பெயரை எந்தக் காரணத்தைக் கொண்டும் மாற்றக்கூடாது!
+        let currentOrigName = inp.getAttribute("data-orig") || inp.getAttribute("data-name") || "";
+        
         inp.value = newHex;
         inp.setAttribute("data-tag", shadeTagText);
-        // Database-ல் சேவ் ஆகும்போது Hex Code செல்லாமல் இருக்க, கலர் பெயரையும் அப்டேட் செய்கிறோம்
-        inp.setAttribute("data-orig", newBaseName);
-        inp.setAttribute("data-name", newBaseName);
+        // data-orig -ஐ ஓவர்ரைட் செய்யும் கோடு நீக்கப்பட்டுவிட்டது
         
         if (btn) btn.style.background = newHex;
         if (disp) {
-            let rawOrigName = getLocalizedColorName(newBaseName) || newBaseName || "Custom";
+            let rawOrigName = getLocalizedColorName(currentOrigName) || currentOrigName || "Custom";
             let cnt = inp.getAttribute("data-cnt") || "";
             let countPrefix = cnt ? `<span style="color:#f59e0b; font-size:0.72rem; font-weight:bold; margin-right:5px;">[${escapeColourText(cnt)}]</span>` : "";
             let tagBadge = `<span style="background:#2563eb;color:#fff;padding:1px 4px;border-radius:3px;font-size:0.58rem;margin-left:4px;">${shadeTagText}</span>`;
@@ -2615,50 +2622,18 @@ function applySelectedColour() {
     if (!targetInp) return;
 
     let targetOldHex = (targetInp.value || "").toLowerCase();
-    let targetOldOrig = (targetInp.getAttribute("data-orig") || "").toLowerCase();
-    let targetOldName = (targetInp.getAttribute("data-name") || "").toLowerCase();
-    let matchKeyOrig = targetOldOrig || targetOldName;
 
     if (isSyncChecked) {
         for (let i = 1; i <= currentWarpCount; i++) {
             let rowInp = $("wC" + i);
-            if (rowInp) {
-                let rowOrig = (rowInp.getAttribute("data-orig") || "").toLowerCase();
-                let rowName = (rowInp.getAttribute("data-name") || "").toLowerCase();
-                let rowHex = (rowInp.value || "").toLowerCase();
-                let rowKeyOrig = rowOrig || rowName;
-
-                let isMatch = false;
-                if (matchKeyOrig && rowKeyOrig === matchKeyOrig) {
-                    isMatch = true;
-                } else if (!matchKeyOrig && rowHex === targetOldHex) {
-                    isMatch = true;
-                }
-
-                if (isMatch) {
-                    updateRowDisplay("w", "wBtn", "wNameDisp", i);
-                }
+            if (rowInp && (rowInp.value || "").toLowerCase() === targetOldHex) {
+                updateRowDisplay("w", "wBtn", "wNameDisp", i);
             }
         }
-
         for (let i = 1; i <= currentWeftCount; i++) {
             let rowInp = $("weftC" + i);
-            if (rowInp) {
-                let rowOrig = (rowInp.getAttribute("data-orig") || "").toLowerCase();
-                let rowName = (rowInp.getAttribute("data-name") || "").toLowerCase();
-                let rowHex = (rowInp.value || "").toLowerCase();
-                let rowKeyOrig = rowOrig || rowName;
-
-                let isMatch = false;
-                if (matchKeyOrig && rowKeyOrig === matchKeyOrig) {
-                    isMatch = true;
-                } else if (!matchKeyOrig && rowHex === targetOldHex) {
-                    isMatch = true;
-                }
-
-                if (isMatch) {
-                    updateRowDisplay("weft", "weftBtn", "weftNameDisp", i);
-                }
+            if (rowInp && (rowInp.value || "").toLowerCase() === targetOldHex) {
+                updateRowDisplay("weft", "weftBtn", "weftNameDisp", i);
             }
         }
     } else {
@@ -2672,7 +2647,6 @@ function applySelectedColour() {
     autoRefresh3D(); 
     closeColourPopup();
 }
-
 
 
 
