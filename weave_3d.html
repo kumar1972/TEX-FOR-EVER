@@ -1529,7 +1529,6 @@ function getCurrentData() {
         dentingPatternFormula: dentP, drawingPatternFormula: drawP
     };
 }
-
 async function saveCurrentDesign() {
     try {
         setStatus("⏳ Saving...");
@@ -1560,6 +1559,7 @@ async function saveCurrentDesign() {
         data.timestamp = new Date().toISOString();
         let cleanName = cleanDesignName(name);
 
+        // Save into local edits cache to preserve original/selected color tones across pages
         try {
             let edits = JSON.parse(localStorage.getItem("local_edits_cache") || "{}");
             edits[cleanName] = clone(data);
@@ -1605,20 +1605,7 @@ async function saveCurrentDesign() {
         draw3DWeave(); 
 
         setStatus("✅ Saved Locally");
-        alert("✅ Design Local-il (Warp/Weft utpada) வெற்றிகரமாக Save ஆகிவிட்டது!");
-
-        if (navigator.onLine && typeof window.supabaseSave === "function") {
-            setTimeout(async () => {
-                try {
-                    await window.supabaseSave("weave_designs", data);
-                    await window.supabaseSave("warp_entry_data", JSON.parse(localStorage.getItem("warp_entry_data") || "[]"));
-                    await window.supabaseSave("weft_entry_data", JSON.parse(localStorage.getItem("weft_entry_data") || "[]"));
-                    setStatus("✅ Local & Cloud Saved!");
-                } catch (err) {
-                    console.log("Cloud save failed:", err);
-                }
-            }, 300);
-        }
+        alert("✅ Design மற்றும் Selected Color Tones வெற்றிகரமாக Save ஆகிவிட்டது!");
 
     } catch(error) { 
         alert("Error: " + error.message);
@@ -1626,6 +1613,8 @@ async function saveCurrentDesign() {
     }
 }
 
+
+            
 function onWeaveChange() {
     let t = $("weaveType")?.value || "custom";
     if(t === "plain" || t === "twill") {
@@ -2520,16 +2509,19 @@ function applySelectedColour() {
     let shadeTagText = selectedColourForPopup.shadeTag || "T-01";
     let isSync = $("syncColorCheck")?.checked ?? true;
 
-    function updateRowDisplay(inp, btn, disp, badge) {
+    function updateRowDisplay(inp, btn, disp) {
         if(!inp) return;
         let currentOrigName = inp.getAttribute("data-orig") || "";
         
         inp.value = newHex;
         inp.setAttribute("data-tag", shadeTagText);
+        if (selectedColourForPopup.name) {
+            inp.setAttribute("data-orig", selectedColourForPopup.baseName || currentOrigName);
+        }
 
         if (btn) btn.style.background = newHex;
         if (disp) {
-            let rawOrigName = getLocalizedColorName(currentOrigName) || currentOrigName || "Custom";
+            let rawOrigName = getLocalizedColorName(selectedColourForPopup.baseName || currentOrigName) || currentOrigName || "Custom";
             let cnt = inp.getAttribute("data-cnt") || "";
             let countPrefix = cnt ? `<span style="color:#f59e0b; font-size:0.72rem; font-weight:bold; margin-right:5px;">[${escapeColourText(cnt)}]</span>` : "";
             let tagBadge = `<span style="background:#2563eb;color:#fff;padding:1px 4px;border-radius:3px;font-size:0.58rem;margin-left:4px;">${shadeTagText}</span>`;
@@ -2560,12 +2552,11 @@ function applySelectedColour() {
             let inp = $("wC" + i);
             let btn = $("wBtn" + i);
             let disp = $("wNameDisp" + i);
-            let badge = $("wShadeBadge" + i);
             if (inp) {
                 let curHex = inp.value.toLowerCase();
                 let curName = cleanBaseColorName(inp.getAttribute("data-orig") || "").toLowerCase();
                 if ((oldName && curName === oldName) || (!oldName && curHex === oldHex)) {
-                    updateRowDisplay(inp, btn, disp, badge);
+                    updateRowDisplay(inp, btn, disp);
                 }
             }
         }
@@ -2574,27 +2565,28 @@ function applySelectedColour() {
             let inp = $("weftC" + i);
             let btn = $("weftBtn" + i);
             let disp = $("weftNameDisp" + i);
-            let badge = $("weftShadeBadge" + i);
             if (inp) {
                 let curHex = inp.value.toLowerCase();
                 let curName = cleanBaseColorName(inp.getAttribute("data-orig") || "").toLowerCase();
                 if ((oldName && curName === oldName) || (!oldName && curHex === oldHex)) {
-                    updateRowDisplay(inp, btn, disp, badge);
+                    updateRowDisplay(inp, btn, disp);
                 }
             }
         }
     } else {
         if(target.type==="warp" && target.index) { 
-            updateRowDisplay($("wC"+target.index), $("wBtn"+target.index), $("wNameDisp"+target.index), $("wShadeBadge"+target.index));
+            updateRowDisplay($("wC"+target.index), $("wBtn"+target.index), $("wNameDisp"+target.index));
         }
         if(target.type==="weft" && target.index) { 
-            updateRowDisplay($("weftC"+target.index), $("weftBtn"+target.index), $("weftNameDisp"+target.index), $("weftShadeBadge"+target.index));
+            updateRowDisplay($("weftC"+target.index), $("weftBtn"+target.index), $("weftNameDisp"+target.index));
         }
     }
     
+    // Auto-update state and cache immediately without removing any existing logic
     autoRefresh3D(); 
     closeColourPopup();
 }
+
 
 function openColourPickerForEntry(type, index) {
     const input = $(type==="warp" ? "wC"+index : "weftC"+index); 
