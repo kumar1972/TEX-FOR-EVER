@@ -2578,19 +2578,8 @@ function applySelectedColour() {
     let shadeTagText = selectedColourForPopup.shadeTag || "T-01";
     let isSyncChecked = $("syncColorCheck")?.checked ?? false;
 
-    // எதை மாற்ற வேண்டும் என்பதைத் தீர்மானிக்க target.type (warp அல்லது weft) எடுக்கப்படுகிறது
-    let isWarp = (target.type === "warp");
-    let count = isWarp ? currentWarpCount : currentWeftCount;
-    let prefix = isWarp ? "w" : "weft";
-    let btnPrefix = isWarp ? "wBtn" : "weftBtn";
-    let nameDispPrefix = isWarp ? "wNameDisp" : "weftNameDisp";
-
-    // முதலில் க்ளிக் செய்த குறிப்பிட்ட வரியின் பழைய கலர்/பெயரைக் கண்டறியவும்
-    let targetInp = $(prefix + "C" + target.index);
-    let targetOldHex = targetInp ? (targetInp.value || "").toLowerCase() : "";
-    let targetOldOrig = targetInp ? (targetInp.getAttribute("data-orig") || "").toLowerCase() : "";
-
-    function updateRowDisplay(idx) {
+    // Warp அல்லது Weft - வரியை அப்டேட் செய்வதற்கான பொதுவான Function
+    function updateRowDisplay(prefix, btnPrefix, nameDispPrefix, idx) {
         let inp = $(prefix + "C" + idx);
         let btn = $(btnPrefix + idx);
         let disp = $(nameDispPrefix + idx);
@@ -2613,30 +2602,76 @@ function applySelectedColour() {
         }
     }
 
+    let targetPrefix = target.type === "warp" ? "w" : "weft";
+    let targetInp = $(targetPrefix + "C" + target.index);
+    if (!targetInp) return;
+
+    let targetOldHex = (targetInp.value || "").toLowerCase();
+    // Hex-ஐ மட்டும் நம்பாமல், ஒரிஜினல் நூல் பெயரையே (T. White, R. Blue) செக் செய்ய எடுக்கிறோம் 
+    let targetOldOrig = (targetInp.getAttribute("data-orig") || "").toLowerCase();
+    let targetOldName = (targetInp.getAttribute("data-name") || "").toLowerCase();
+    let matchKeyOrig = targetOldOrig || targetOldName;
+
     if (isSyncChecked) {
-        // Sync ஆன் செய்யப்பட்டிருந்தால்: அதே நிறம் (Color/Hex) அல்லது பெயர் உள்ள அனைத்து வரிகளிலும் இந்த புதிய ஷேட் மாறும்
-        for (let i = 1; i <= count; i++) {
-            let rowInp = $(prefix + "C" + i);
+        // --- SYNC EVERYWHERE (WARP & WEFT முழுவதற்கும் மாறும்) ---
+
+        // 1. Warp வரிகளை செக் செய்து மாற்ற
+        for (let i = 1; i <= currentWarpCount; i++) {
+            let rowInp = $("wC" + i);
             if (rowInp) {
-                let rowHex = (rowInp.value || "").toLowerCase();
                 let rowOrig = (rowInp.getAttribute("data-orig") || "").toLowerCase();
-                
-                // பழைய கலர் ஹெக்ஸ் (Hex) அல்லது ஒரிஜினல் பெயர் பொருந்தினால் அனைத்திலும் மாறும்
-                if (rowHex === targetOldHex || (targetOldOrig && rowOrig === targetOldOrig)) {
-                    updateRowDisplay(i);
+                let rowName = (rowInp.getAttribute("data-name") || "").toLowerCase();
+                let rowHex = (rowInp.value || "").toLowerCase();
+                let rowKeyOrig = rowOrig || rowName;
+
+                // பெயர் ஒன்றாக இருந்தால் மட்டுமே மாறும் (சம்பந்தமில்லாத வரிகள் மாறாது)
+                let isMatch = false;
+                if (matchKeyOrig && rowKeyOrig === matchKeyOrig) {
+                    isMatch = true;
+                } else if (!matchKeyOrig && rowHex === targetOldHex) {
+                    isMatch = true;
+                }
+
+                if (isMatch) {
+                    updateRowDisplay("w", "wBtn", "wNameDisp", i);
+                }
+            }
+        }
+
+        // 2. Weft வரிகளை செக் செய்து மாற்ற
+        for (let i = 1; i <= currentWeftCount; i++) {
+            let rowInp = $("weftC" + i);
+            if (rowInp) {
+                let rowOrig = (rowInp.getAttribute("data-orig") || "").toLowerCase();
+                let rowName = (rowInp.getAttribute("data-name") || "").toLowerCase();
+                let rowHex = (rowInp.value || "").toLowerCase();
+                let rowKeyOrig = rowOrig || rowName;
+
+                let isMatch = false;
+                if (matchKeyOrig && rowKeyOrig === matchKeyOrig) {
+                    isMatch = true;
+                } else if (!matchKeyOrig && rowHex === targetOldHex) {
+                    isMatch = true;
+                }
+
+                if (isMatch) {
+                    updateRowDisplay("weft", "weftBtn", "weftNameDisp", i);
                 }
             }
         }
     } else {
-        // Sync ஆஃப் செய்யப்பட்டிருந்தால்: குறிப்பிட்ட அந்த ஒரு வரிக்கு மட்டும் மாறும்
-        if (target.index) {
-            updateRowDisplay(target.index);
+        // --- Sync இல்லையென்றால்: குறிப்பிட்ட அந்த ஒரு வரிக்கு மட்டும் ---
+        if (target.type === "warp") {
+            updateRowDisplay("w", "wBtn", "wNameDisp", target.index);
+        } else if (target.type === "weft") {
+            updateRowDisplay("weft", "weftBtn", "weftNameDisp", target.index);
         }
     }
     
     autoRefresh3D(); 
     closeColourPopup();
 }
+
 
 
 function openColourPickerForEntry(type, index) {
