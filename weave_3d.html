@@ -635,31 +635,35 @@ input, select {
         </div>
     </div>
 </div>
+<!-- Controls Bar (Single line, hidden during print) -->
+<div class="print-controls-bar">
+    <div style="font-size:11px; font-weight:900; color:#1e293b;">🖨️ Professional Design Sheet</div>
+    <div style="display:flex; align-items:center; gap:10px;">
+        
+        <!-- Page Orientation Dropdown with Label -->
+        <div style="display:flex; align-items:center; gap:4px;">
+            <span style="font-size:10px; font-weight:800; color:#64748b;">📄 Page:</span>
+            <select id="printOrientation" onchange="updatePrintOrientation()">
+                <option value="portrait">A4 Portrait</option>
+                <option value="landscape">A4 Landscape</option>
+            </select>
+        </div>
+        
+        <!-- Graph Scale Dropdown with Label -->
+        <div style="display:flex; align-items:center; gap:4px;">
+            <span style="font-size:10px; font-weight:800; color:#64748b;">📊 Graph:</span>
+            <select id="printGraphScale" onchange="applyPrintGraphScale()">
+                <option value="small">Small</option>
+                <option value="medium" selected>Medium</option>
+                <option value="large">Large</option>
+            </select>
+        </div>
+        
+        <button class="btn-print-action" onclick="triggerRealPrint()">🖨️ PRINT</button>
+        <button class="btn-close-action" onclick="closeGraphPrintPreview()">✕ CLOSE</button>
+    </div>
+</div>
 
-<!-- PROFESSIONAL DESIGN SHEET PRINT PREVIEW (Correctly placed as separate modal) -->
-<div id="printModalBox" class="print-modal">
-    <div class="print-sheet">
-        <div class="print-sheet-inner">
-            
-            <!-- Controls Bar (Single line, hidden during print) -->
-            <div class="print-controls-bar">
-                <div style="font-size:11px; font-weight:900; color:#1e293b;">🖨️ Professional Design Sheet</div>
-                <div style="display:flex; align-items:center; gap:6px;">
-                    <select id="printOrientation" onchange="updatePrintOrientation()">
-                        <option value="portrait">A4 Portrait</option>
-                        <option value="landscape">A4 Landscape</option>
-                    </select>
-                    
-                    <select id="printGraphScale" onchange="applyPrintGraphScale()">
-                        <option value="small">Graph Small</option>
-                        <option value="medium" selected>Graph Medium</option>
-                        <option value="large">Graph Large</option>
-                    </select>
-                    
-                    <button class="btn-print-action" onclick="triggerRealPrint()">🖨️ PRINT</button>
-                    <button class="btn-close-action" onclick="closeGraphPrintPreview()">✕ CLOSE</button>
-                </div>
-            </div>
 
             <!-- Dynamic Design Sheet Content -->
             <div id="printDesignContent"></div>
@@ -2577,6 +2581,9 @@ function applySelectedColour() {
     let newHex = selectedColourForPopup.hex.toLowerCase(); 
     let shadeTagText = selectedColourForPopup.shadeTag || "T-01";
     let isSyncChecked = $("syncColorCheck")?.checked ?? false;
+    
+    // புதிய கலரின் ஒரிஜினல் பெயரை எடுக்கிறோம்
+    let newBaseName = selectedColourForPopup.baseName || selectedColourForPopup.name || "";
 
     // Warp அல்லது Weft - வரியை அப்டேட் செய்வதற்கான பொதுவான Function
     function updateRowDisplay(prefix, btnPrefix, nameDispPrefix, idx) {
@@ -2585,14 +2592,15 @@ function applySelectedColour() {
         let disp = $(nameDispPrefix + idx);
         if(!inp) return;
         
-        let currentOrigName = inp.getAttribute("data-orig") || "";
-        
         inp.value = newHex;
         inp.setAttribute("data-tag", shadeTagText);
+        // Database-ல் சேவ் ஆகும்போது Hex Code செல்லாமல் இருக்க, கலர் பெயரையும் அப்டேட் செய்கிறோம்
+        inp.setAttribute("data-orig", newBaseName);
+        inp.setAttribute("data-name", newBaseName);
         
         if (btn) btn.style.background = newHex;
         if (disp) {
-            let rawOrigName = getLocalizedColorName(currentOrigName) || currentOrigName || "Custom";
+            let rawOrigName = getLocalizedColorName(newBaseName) || newBaseName || "Custom";
             let cnt = inp.getAttribute("data-cnt") || "";
             let countPrefix = cnt ? `<span style="color:#f59e0b; font-size:0.72rem; font-weight:bold; margin-right:5px;">[${escapeColourText(cnt)}]</span>` : "";
             let tagBadge = `<span style="background:#2563eb;color:#fff;padding:1px 4px;border-radius:3px;font-size:0.58rem;margin-left:4px;">${shadeTagText}</span>`;
@@ -2607,15 +2615,11 @@ function applySelectedColour() {
     if (!targetInp) return;
 
     let targetOldHex = (targetInp.value || "").toLowerCase();
-    // Hex-ஐ மட்டும் நம்பாமல், ஒரிஜினல் நூல் பெயரையே (T. White, R. Blue) செக் செய்ய எடுக்கிறோம் 
     let targetOldOrig = (targetInp.getAttribute("data-orig") || "").toLowerCase();
     let targetOldName = (targetInp.getAttribute("data-name") || "").toLowerCase();
     let matchKeyOrig = targetOldOrig || targetOldName;
 
     if (isSyncChecked) {
-        // --- SYNC EVERYWHERE (WARP & WEFT முழுவதற்கும் மாறும்) ---
-
-        // 1. Warp வரிகளை செக் செய்து மாற்ற
         for (let i = 1; i <= currentWarpCount; i++) {
             let rowInp = $("wC" + i);
             if (rowInp) {
@@ -2624,7 +2628,6 @@ function applySelectedColour() {
                 let rowHex = (rowInp.value || "").toLowerCase();
                 let rowKeyOrig = rowOrig || rowName;
 
-                // பெயர் ஒன்றாக இருந்தால் மட்டுமே மாறும் (சம்பந்தமில்லாத வரிகள் மாறாது)
                 let isMatch = false;
                 if (matchKeyOrig && rowKeyOrig === matchKeyOrig) {
                     isMatch = true;
@@ -2638,7 +2641,6 @@ function applySelectedColour() {
             }
         }
 
-        // 2. Weft வரிகளை செக் செய்து மாற்ற
         for (let i = 1; i <= currentWeftCount; i++) {
             let rowInp = $("weftC" + i);
             if (rowInp) {
@@ -2660,7 +2662,6 @@ function applySelectedColour() {
             }
         }
     } else {
-        // --- Sync இல்லையென்றால்: குறிப்பிட்ட அந்த ஒரு வரிக்கு மட்டும் ---
         if (target.type === "warp") {
             updateRowDisplay("w", "wBtn", "wNameDisp", target.index);
         } else if (target.type === "weft") {
@@ -2671,6 +2672,7 @@ function applySelectedColour() {
     autoRefresh3D(); 
     closeColourPopup();
 }
+
 
 
 
