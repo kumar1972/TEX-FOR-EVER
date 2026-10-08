@@ -83,7 +83,7 @@ function translateColorName(colorName) {
         'r blue': 'R. புளு', 'royal blue': 'R. புளு',
         's blue': 'S. புளு', 'sky blue': 'S. புளு', 'skyblue': 'S. புளு',
         'bottle green': 'பாட்டில் கிரீன்', 'b green': 'பாட்டில் கிரீன்',
-        'parrot green': 'பேரட் கிரீன்', 'p green': 'பேரட் கிரீன்',
+        'parrot green': 'P. கிரீன்', 'p green': 'P. கிரீன்',
         'rani pink': 'ராணி பிங்க்', 'rama green': 'ராமா கிரீன்',
         '1/2 salavai': '1/2 சலவை', '1/2 white': '1/2 சலவை',
         't salavai': 'T. சலவை', 't white': 'T. சலவை',
