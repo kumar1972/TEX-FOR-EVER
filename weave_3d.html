@@ -635,6 +635,7 @@ input, select {
         </div>
     </div>
 </div>
+
 <!-- PROFESSIONAL DESIGN SHEET PRINT PREVIEW -->
 <div id="printModalBox" class="print-modal">
     <div class="print-sheet">
@@ -670,13 +671,6 @@ input, select {
             </div>
 
             <!-- Dynamic Design Sheet Content -->
-            <div id="printDesignContent"></div>
-            
-        </div>
-    </div>
-</div>
-
-  <!-- Dynamic Design Sheet Content -->
             <div id="printDesignContent"></div>
             
         </div>
@@ -1152,7 +1146,7 @@ function renderUIWithData(w=[], f=[]) {
         let wh = ""; let fh = "";
 
         for(let i=0; i<wc; i++) {
-            let x = w[i] ? normLine(w[i], true) : { origName: "", color: "#ffffff", amount: 0, span: "", repeat: "", count: "", isSeer: false, shadeTag: "" };
+            let x = w[i] ? normLine(w[i], true) : { origName: "", color: "#ffffff", hex: "#ffffff", amount: 0, span: "", repeat: "", count: "", isSeer: false, shadeTag: "" };
             let lineNum = i + 1; let match = wRanges.find(r => r.start == lineNum);
             let spanVal = match ? (match.end - match.start + 1) : (x.span > 1 ? x.span : ""); let repVal = match ? match.set : (x.repeat > 1 ? x.repeat : "");
             let safeOrig = escapeColourText(x.origName);
@@ -1164,11 +1158,11 @@ function renderUIWithData(w=[], f=[]) {
 
             wh += `<div>
                 <label>W${i+1}</label>
-                <button type="button" class="yarn-color-btn" id="wBtn${i+1}" style="background:${x.color};" onclick="openColourPickerForEntry('warp', ${i+1})"></button>
+                <button type="button" class="yarn-color-btn" id="wBtn${i+1}" style="background:${x.hex};" onclick="openColourPickerForEntry('warp', ${i+1})"></button>
                 <div class="yarn-name-display" id="wNameDisp${i+1}" onclick="openColourPickerForEntry('warp', ${i+1})" title="${rawOrigName}">
                     ${countPrefix}<span class="col-name-label">${rawOrigName}</span>${shadeTagBadge}
                 </div>
-                <input type="color" id="wC${i+1}" value="${x.color}" data-orig="${safeOrig}" data-tag="${escapeColourText(x.shadeTag)}" data-cnt="${escapeColourText(countVal)}" data-name="${escapeColourText(x.origName)}" data-seer="${x.isSeer?'1':'0'}" style="display:none;">
+                <input type="color" id="wC${i+1}" value="${x.hex}" data-orig="${safeOrig}" data-tag="${escapeColourText(x.shadeTag)}" data-cnt="${escapeColourText(countVal)}" data-name="${escapeColourText(x.origName)}" data-seer="${x.isSeer?'1':'0'}" style="display:none;">
                 <input type="number" id="wE${i+1}" value="${x.amount||''}" min="0" inputmode="numeric" oninput="updateYarnSummary('warp'); autoRefresh3D();">
                 <div class="set-box" style="display:none;">
                     <input type="number" id="wSpan${i+1}" value="${spanVal}">
@@ -1177,7 +1171,7 @@ function renderUIWithData(w=[], f=[]) {
             </div>`;
         }
         for(let i=0; i<fc; i++) {
-            let x = f[i] ? normLine(f[i], false) : { origName: "", color: "#ffffff", amount: 0, span: "", repeat: "", count: "", shadeTag: "" };
+            let x = f[i] ? normLine(f[i], false) : { origName: "", color: "#ffffff", hex: "#ffffff", amount: 0, span: "", repeat: "", count: "", shadeTag: "" };
             let lineNum = i + 1; let match = fRanges.find(r => r.start == lineNum);
             let spanVal = match ? (match.end - match.start + 1) : (x.span > 1 ? x.span : ""); let repVal = match ? match.set : (x.repeat > 1 ? x.repeat : "");
             let safeOrig = escapeColourText(x.origName);
@@ -1189,11 +1183,11 @@ function renderUIWithData(w=[], f=[]) {
 
             fh += `<div>
                 <label>Wft${i+1}</label>
-                <button type="button" class="yarn-color-btn" id="weftBtn${i+1}" style="background:${x.color};" onclick="openColourPickerForEntry('weft', ${i+1})"></button>
+                <button type="button" class="yarn-color-btn" id="weftBtn${i+1}" style="background:${x.hex};" onclick="openColourPickerForEntry('weft', ${i+1})"></button>
                 <div class="yarn-name-display" id="weftNameDisp${i+1}" onclick="openColourPickerForEntry('weft', ${i+1})" title="${rawOrigName}">
                     ${countPrefix}<span class="col-name-label">${rawOrigName}</span>${shadeTagBadge}
                 </div>
-                <input type="color" id="weftC${i+1}" value="${x.color}" data-orig="${safeOrig}" data-tag="${escapeColourText(x.shadeTag)}" data-cnt="${escapeColourText(countVal)}" data-name="${escapeColourText(x.origName)}" style="display:none;">
+                <input type="color" id="weftC${i+1}" value="${x.hex}" data-orig="${safeOrig}" data-tag="${escapeColourText(x.shadeTag)}" data-cnt="${escapeColourText(countVal)}" data-name="${escapeColourText(x.origName)}" style="display:none;">
                 <input type="number" id="weftP${i+1}" value="${x.amount||''}" min="0" inputmode="numeric" oninput="updateYarnSummary('weft'); autoRefresh3D();">
                 <div class="set-box" style="display:none;">
                     <input type="number" id="weftSpan${i+1}" value="${spanVal}">
@@ -1613,6 +1607,7 @@ function getCurrentData() {
         dentingPatternFormula: dentP, drawingPatternFormula: drawP
     };
 }
+
 async function saveCurrentDesign() {
     try {
         setStatus("⏳ Saving...");
@@ -1643,14 +1638,11 @@ async function saveCurrentDesign() {
         data.timestamp = new Date().toISOString();
         let cleanName = cleanDesignName(name);
 
-        // 1. 3D Weave-க்கான தனிப்பட்ட Save (local_edits_cache) - இதில் மட்டுமே Save ஆகும்
         try {
             let edits = JSON.parse(localStorage.getItem("local_edits_cache") || "{}");
             edits[cleanName] = clone(data);
             localStorage.setItem("local_edits_cache", JSON.stringify(edits));
         } catch(e) {}
-
-        // ❌ முந்தைய கோடில் இருந்த warp_entry_data மற்றும் weft_entry_data-வை Overwrite செய்யும் தவறான வரிகள் முழுமையாக நீக்கப்பட்டுவிட்டன!
 
         localStorage.setItem("last_edit_timestamp", Date.now().toString());
         window._lastEditStamp = localStorage.getItem("last_edit_timestamp");
@@ -1659,7 +1651,6 @@ async function saveCurrentDesign() {
         cache.push(clone(data));
         allCloudDesigns = mergeDesigns(cache); 
         
-        // 2. 3D Weave-க்கான பொதுவான Cache-ல் அப்டேட்
         localStorage.setItem("weave_designs_cache", JSON.stringify(allCloudDesigns));
         activeDesignObj = clone(data); 
         localStorage.setItem("weave_last_design_name", name);
@@ -1678,8 +1669,6 @@ async function saveCurrentDesign() {
         setStatus("❌ Error saving");
     }
 }
-
-
             
 function onWeaveChange() {
     let t = $("weaveType")?.value || "custom";
@@ -2581,12 +2570,10 @@ function applySelectedColour() {
         let disp = $(nameDispPrefix + idx);
         if(!inp) return;
         
-        // 🔴 பழைய ஒரிஜினல் பெயரை எடுக்கிறோம். இதை எக்காரணம் கொண்டும் மாற்றக்கூடாது!
         let currentOrigName = inp.getAttribute("data-orig") || inp.getAttribute("data-name") || "";
         
         inp.value = newHex;
         inp.setAttribute("data-tag", shadeTagText);
-        // 🔴 data-orig அல்லது data-name-ஐ overwrite செய்யும் கோடு முழுமையாக நீக்கப்பட்டுவிட்டது!
         
         if (btn) btn.style.background = newHex;
         if (disp) {
@@ -2604,14 +2591,12 @@ function applySelectedColour() {
     let targetInp = $(targetPrefix + "C" + target.index);
     if (!targetInp) return;
 
-    // 🔴 Sync செய்வதற்காக, க்ளிக் செய்த வரியின் ஒரிஜினல் பெயரை எடுக்கிறோம்
     let targetOldOrig = (targetInp.getAttribute("data-orig") || "").toLowerCase().trim();
     let targetOldName = (targetInp.getAttribute("data-name") || "").toLowerCase().trim();
     let matchKeyOrig = targetOldOrig || targetOldName;
     let targetOldHex = (targetInp.value || "").toLowerCase();
 
     if (isSyncChecked) {
-        // Warp வரிகளைச் சரிபார்த்தல்
         for (let i = 1; i <= currentWarpCount; i++) {
             let rowInp = $("wC" + i);
             if (rowInp) {
@@ -2620,12 +2605,10 @@ function applySelectedColour() {
                 let rowKeyOrig = rowOrig || rowName;
                 let rowHex = (rowInp.value || "").toLowerCase();
 
-                // 🔴 அசல் பெயர் (Original Name) ஒன்றாக இருந்தால் மட்டுமே மாற்ற வேண்டும்! (Hex-ஐ வைத்து மட்டும் செக் செய்யக்கூடாது)
                 let isMatch = false;
                 if (matchKeyOrig && rowKeyOrig === matchKeyOrig) {
                     isMatch = true;
                 } else if (!matchKeyOrig && rowHex === targetOldHex) {
-                    // பெயர் இல்லையென்றால் மட்டுமே Hex-ஐ வைத்து மேட்ச் செய்கிறோம்
                     isMatch = true;
                 }
 
@@ -2635,7 +2618,6 @@ function applySelectedColour() {
             }
         }
         
-        // Weft வரிகளைச் சரிபார்த்தல்
         for (let i = 1; i <= currentWeftCount; i++) {
             let rowInp = $("weftC" + i);
             if (rowInp) {
@@ -2667,7 +2649,6 @@ function applySelectedColour() {
     autoRefresh3D(); 
     closeColourPopup();
 }
-
 
 function openColourPickerForEntry(type, index) {
     const input = $(type==="warp" ? "wC"+index : "weftC"+index); 
