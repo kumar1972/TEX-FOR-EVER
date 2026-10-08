@@ -576,7 +576,7 @@ input, select {
             </div>
             <button style="background:#244638;border:1px solid #39614f;" onclick="refreshFullscreen3D()">↺ 1:1 Reset</button>
             <button style="background:#217eaf;font-size:0.75rem;padding:6px 14px;" onclick="openCadPrintModal()">🖨️ Print CAD (A4)</button>
-            <button style="background:#633b3b" onclick="closeFullscreen()">✖ Close</button>
+            <button style="background:#ef4444;font-size:0.75rem;padding:6px 14px;" onclick="closeFullscreen()">✖ Close</button>
         </div>
     </div>
 
@@ -629,8 +629,9 @@ input, select {
             A4-ல் பிரிண்ட் ஆகும் அளவு: <b id="cadPrintSizeDisp" style="color:#45c765;">0 × 0 cm</b>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px;">
             <button class="btn btn-green" onclick="executeRealA4Print()">🖨️ Print Now</button>
+            <button class="btn btn-blue" onclick="executePrintPdf()" style="font-size: 0.65rem; padding: 6px;">📥 Print PDF</button>
             <button class="btn btn-dark" onclick="closeCadPrintModal()">✖ Cancel</button>
         </div>
     </div>
@@ -1090,12 +1091,6 @@ function sanitizeDesignObj(d) {
         ];
     }
     return d;
-}
-
-function pickRicherArray(arr1, arr2) {
-    if (!Array.isArray(arr1) || arr1.length === 0) return Array.isArray(arr2) ? arr2 : [];
-    if (!Array.isArray(arr2) || arr2.length === 0) return arr1;
-    return arr2.length >= arr1.length ? arr2 : arr1;
 }
 
 function mergeDesigns(items) {
@@ -2710,7 +2705,11 @@ function autoFitToA4() {
     updateCadPrintScale(fitVal);
 }
 
-async function executeRealA4Print() {
+async function executePrintPdf() {
+    executeRealA4Print(true);
+}
+
+async function executeRealA4Print(isPdfMode = false) {
     try {
         let baseWarp = []; let w_idx = 1; let warpSeerMap = []; let baseWarpYarnInfo = [];
         while(w_idx <= currentWarpCount){
@@ -3144,7 +3143,13 @@ async function executeRealA4Print() {
             const doPrint = function() {
                 try {
                     printWin.focus();
-                    printWin.print();
+                    if (isPdfMode) {
+                        // User requested direct PDF save/print prompt without triggering external picker dialog if possible
+                        printWin.print();
+                    } else {
+                        printWin.print();
+                    }
+                    setTimeout(() => { printWin.close(); }, 500);
                 } catch(e) {}
             };
 

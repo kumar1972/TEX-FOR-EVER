@@ -86,6 +86,34 @@ body{
     z-index:50;
 }
 
+.header-left-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+}
+
+.sidebar-toggle-btn {
+    background: rgba(56,189,248,.15);
+    border: 1.5px solid #38BDF8;
+    color: #38BDF8;
+    font-size: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(56,189,248,.3);
+}
+
+.sidebar-toggle-btn:hover {
+    background: rgba(56,189,248,.3);
+    transform: scale(1.05);
+}
+
 .top-header-container h3 {
     flex: 1;
 
@@ -93,13 +121,12 @@ body{
     align-items: center;
     justify-content: flex-start;
 
-    font-size: 30px;
+    font-size: 26px;
     font-weight: 900;
 
     letter-spacing: 1.5px;
     line-height: 1.5;
 
-    /* Gradient-ல் இன்னும் கொஞ்சம் கலர் சேர்த்து background-size பெரிதாக்கப்பட்டுள்ளது */
     background: linear-gradient(
         135deg,
         #38BDF8,
@@ -110,18 +137,15 @@ body{
     );
     background-size: 300% 300%;
 
-    /* Text Clip Properties */
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 
     text-transform: uppercase;
 
-    /* Glowing Effect மற்றும் Animation */
     animation: colorful-glow 3s ease-in-out infinite;
 }
 
-/* Glow & Color Moving Animation */
 @keyframes colorful-glow {
     0% {
         background-position: 0% 50%;
@@ -142,6 +166,178 @@ body{
 }
 
 
+/* =========================================================
+   SIDEBAR NAVIGATION MENU DRAWER (ACCORDION)
+========================================================= */
+
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 99999;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+.sidebar-container {
+    position: fixed;
+    top: 0;
+    left: -320px;
+    width: 300px;
+    height: 100vh;
+    background: #0B1120;
+    border-right: 2px solid #38BDF8;
+    z-index: 100000;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 10px 0 30px rgba(0,0,0,0.9);
+    transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-container.active {
+    left: 0;
+}
+
+.sidebar-header {
+    padding: 20px;
+    background: #0F172A;
+    border-bottom: 1px solid rgba(56,189,248,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar-header h4 {
+    color: #38BDF8;
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.sidebar-close-btn {
+    background: transparent;
+    border: none;
+    color: #F87171;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.sidebar-menu-items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Accordion Main Menu Item */
+.menu-accordion-group {
+    display: flex;
+    flex-direction: column;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(56,189,248,0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.menu-accordion-btn {
+    width: 100%;
+    padding: 14px 16px;
+    background: transparent;
+    border: none;
+    color: #38BDF8;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    letter-spacing: 0.5px;
+}
+
+.menu-accordion-btn:hover {
+    background: rgba(56,189,248,0.1);
+}
+
+.accordion-arrow {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+}
+
+.menu-accordion-group.active .accordion-arrow {
+    transform: rotate(180deg);
+}
+
+/* Submenu Container */
+.submenu-list {
+    max-height: 0;
+    overflow: hidden;
+    background: rgba(3,7,18,0.6);
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid transparent;
+}
+
+.menu-accordion-group.active .submenu-list {
+    max-height: 300px;
+    border-top: 1px solid rgba(56,189,248,0.15);
+    padding: 6px 0;
+}
+
+.submenu-item {
+    padding: 10px 16px 10px 28px;
+    color: #CBD5E1;
+    text-decoration: none;
+    font-size: 12.5px;
+    font-weight: 600;
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.submenu-item:hover {
+    background: rgba(56,189,248,0.15);
+    color: #38BDF8;
+    border-left-color: #38BDF8;
+    padding-left: 32px;
+}
+
+/* Standalone Sidebar Direct Links */
+.sidebar-direct-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(56,189,248,0.15);
+    border-radius: 12px;
+    color: #CBD5E1;
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.sidebar-direct-item:hover {
+    background: rgba(56,189,248,0.2);
+    color: #38BDF8;
+    border-color: #38BDF8;
+    transform: translateX(4px);
+}
+
 
 /* =========================================================
    COMPANY LOGO
@@ -158,8 +354,8 @@ body{
 }
 
 #companyLogoContainer img{
-    height:100px;
-    width:100px;
+    height:90px;
+    width:90px;
 
     border-radius:12px;
     border:2px solid #38BDF8;
@@ -171,8 +367,8 @@ body{
 }
 
 .logo-placeholder{
-    height:70px;
-    width:70px;
+    height:65px;
+    width:65px;
 
     display:flex;
     align-items:center;
@@ -406,49 +602,6 @@ body{
     padding:5px 0;
 }
 
-.zoom-controls-row{
-    display:flex;
-
-    align-items:center;
-    justify-content:space-between;
-
-    background:#020b08;
-
-    padding:6px 12px;
-
-    border-radius:12px;
-
-    border:1px solid rgba(52,211,153,.3);
-}
-
-.zoom-btn{
-    background:#0F172A;
-
-    border:1px solid #34D399;
-
-    color:#34D399;
-
-    font-size:18px;
-    font-weight:bold;
-
-    width:32px;
-    height:32px;
-
-    border-radius:8px;
-
-    cursor:pointer;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-
-.zoom-val-text{
-    font-weight:800;
-    font-size:14px;
-    color:#FFF;
-}
-
 .fit-screen-action-btn{
     background:#3B82F6;
     color:#FFF;
@@ -460,6 +613,7 @@ body{
     border-radius:12px;
 
     font-size:12.5px;
+
     font-weight:800;
 
     cursor:pointer;
@@ -1076,18 +1230,17 @@ body{
         padding:18px;
     }
 
+    .header-left-group {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
     .top-header-container h3{
-        flex:1 1 100%;
-
-        text-align:center;
-
-        justify-content:center;
-
-        font-size:23px;
+        font-size:20px;
     }
 
     #companyLogoContainer{
-        flex:1 1 100%;
+        flex:1 1 auto;
     }
 
     .header-right-actions{
@@ -1302,14 +1455,96 @@ body{
 <body>
 
 <!-- =========================================================
+     SIDEBAR NAVIGATION MENU DRAWER (ADVANCED ACCORDION)
+========================================================= -->
+
+<div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<div id="sidebarContainer" class="sidebar-container">
+    <div class="sidebar-header">
+        <h4>📋 Quick Menu</h4>
+        <button class="sidebar-close-btn" onclick="toggleSidebar()">×</button>
+    </div>
+
+    <div class="sidebar-menu-items">
+
+        <!-- 1. ORDER MENU -->
+        <div class="menu-accordion-group" id="accordionOrder">
+            <button class="menu-accordion-btn" onclick="toggleAccordion('accordionOrder')">
+                <span>📦 1. Order</span>
+                <span class="accordion-arrow">▼</span>
+            </button>
+            <div class="submenu-list">
+                <a href="#" class="submenu-item" onclick="navigateToPage('Party_Orders.html');return false;">• Party Order Page</a>
+                <a href="#" class="submenu-item" onclick="navigateToPage('Despatch.html');return false;">• Despatched Page</a>
+            </div>
+        </div>
+
+        <!-- 2. DESIGN MENU -->
+        <div class="menu-accordion-group" id="accordionDesign">
+            <button class="menu-accordion-btn" onclick="toggleAccordion('accordionDesign')">
+                <span>🎨 2. Design</span>
+                <span class="accordion-arrow">▼</span>
+            </button>
+            <div class="submenu-list">
+                <a href="#" class="submenu-item" onclick="navigateToPage('design_master.html');return false;">• New Design Entry</a>
+                <a href="#" class="submenu-item" onclick="navigateToPage('warp_entry.html');return false;">• Warp Entry</a>
+                <a href="#" class="submenu-item" onclick="navigateToPage('weft_entry.html');return false;">• Weft Entry</a>
+            </div>
+        </div>
+
+        <!-- 3. YARN MENU -->
+        <div class="menu-accordion-group" id="accordionYarn">
+            <button class="menu-accordion-btn" onclick="toggleAccordion('accordionYarn')">
+                <span>🧵 3. Yarn</span>
+                <span class="accordion-arrow">▼</span>
+            </button>
+            <div class="submenu-list">
+                <a href="#" class="submenu-item" onclick="navigateToPage('kora_yarn.html');return false;">• Kora Purchase</a>
+                <a href="#" class="submenu-item" onclick="navigateToPage('dyeing_issue.html');return false;">• Dyeing Order Issue</a>
+                <a href="#" class="submenu-item" onclick="navigateToPage('dyeing_receive.html');return false;">• Dyed Colours Receive</a>
+                <a href="#" class="submenu-item" onclick="navigateToPage('warping.html');return false;">• Warping Program</a>
+            </div>
+        </div>
+
+        <!-- 4. FABRICS MENU -->
+        <div class="menu-accordion-group" id="accordionFabrics">
+            <button class="menu-accordion-btn" onclick="toggleAccordion('accordionFabrics')">
+                <span>👕 4. Fabrics</span>
+                <span class="accordion-arrow">▼</span>
+            </button>
+            <div class="submenu-list">
+                <a href="#" class="submenu-item" onclick="navigateToPage('weaving.html');return false;">• Weaving Program</a>
+                <a href="#" class="submenu-item" onclick="navigateToPage('weaving_receive.html');return false;">• Weavers Fabrics Received</a>
+                <a href="#" class="submenu-item" onclick="navigateToPage('washing.html');return false;">• Washing Program</a>
+                <a href="#" class="submenu-item" onclick="navigateToPage('Despatch.html');return false;">• Despatched Page</a>
+            </div>
+        </div>
+
+        <!-- QUICK DIRECT LINKS -->
+        <a href="#" class="sidebar-direct-item" onclick="navigateToPage('process_matrix.html');return false;">📊 Process Matrix</a>
+        <a href="#" class="sidebar-direct-item" onclick="navigateToPage('weave_3d.html');return false;">👕 3D Simulation</a>
+        <a href="#" class="sidebar-direct-item" onclick="navigateToPage('report.html');return false;">📈 All Reports</a>
+        <a href="#" class="sidebar-direct-item" onclick="navigateToPage('settings.html');return false;">🛠️ Settings</a>
+
+    </div>
+</div>
+
+
+<!-- =========================================================
      HEADER
 ========================================================= -->
 
 <div class="top-header-container">
 
-    <h3 id="appHeaderTitle">
-        TEX FOR EVER 
-    </h3>
+    <div class="header-left-group">
+        <button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Open Sidebar Menu">
+            ☰
+        </button>
+        <h3 id="appHeaderTitle">
+            TEX FOR EVER 
+        </h3>
+    </div>
 
     <div id="companyLogoContainer"
          onclick="navigateToPage('settings.html')"
@@ -2072,6 +2307,31 @@ body{
 
 
 /* =========================================================
+   SIDEBAR TOGGLE & ACCORDION FUNCTIONS
+========================================================= */
+
+function toggleSidebar() {
+    const sidebar = document.getElementById("sidebarContainer");
+    const overlay = document.getElementById("sidebarOverlay");
+    if (sidebar && overlay) {
+        sidebar.classList.toggle("active");
+        overlay.classList.toggle("active");
+    }
+}
+
+function toggleAccordion(groupId) {
+    const group = document.getElementById(groupId);
+    if (group) {
+        // Optional: close other accordions if you want only one open at a time
+        // document.querySelectorAll('.menu-accordion-group').forEach(el => {
+        //     if(el.id !== groupId) el.classList.remove('active');
+        // });
+        group.classList.toggle("active");
+    }
+}
+
+
+/* =========================================================
    SAFE JSON
 ========================================================= */
 
@@ -2152,6 +2412,12 @@ function navigateToPage(pageUrl){
 
     if(!pageUrl)
         return;
+
+    // Close sidebar when navigating
+    const sidebar = document.getElementById("sidebarContainer");
+    const overlay = document.getElementById("sidebarOverlay");
+    if(sidebar) sidebar.classList.remove("active");
+    if(overlay) overlay.classList.remove("active");
 
     const cleanPage =
         String(pageUrl).split("?")[0];
@@ -3186,7 +3452,6 @@ function setTheme(theme){
         theme
     );
 
-    // Apply color directly to body
     const themeBgs = {
         dark: "#030e12",
         softgreen: "#042018",
@@ -3724,12 +3989,6 @@ window.addEventListener(
 
             startClock();
 
-
-            /*
-             * Cloud is optional.
-             * Dashboard must work even when
-             * Supabase is not loaded.
-             */
 
             await waitForCloudSync(5000);
 

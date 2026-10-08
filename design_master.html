@@ -12,13 +12,13 @@
         
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
         
-        html, body { width: 100%; min-height: 100vh; background: #030712; color: #1E2B23; }
+        html, body { width: 100%; min-height: 100vh; background: #E2E8F0; color: #0F172A; }
         body { padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
         
         .main-card {
-            width: 100%; max-width: 800px; margin: 0; background: #FFFFFF;
-            border-radius: 0 0 20px 20px; padding: 16px; box-shadow: none;
-            border: none; display: flex; flex-direction: column; gap: 10px;
+            width: 100%; max-width: 800px; margin: 0; background: #F8FAFC;
+            border-radius: 0 0 20px 20px; padding: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            border: 2px solid #94A3B8; display: flex; flex-direction: column; gap: 10px;
             position: relative; overflow: hidden;
         }
 
@@ -26,62 +26,62 @@
 
         .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
         .back-btn {
-            display: inline-flex; align-items: center; gap: 6px; color: #FFFFFF;
+            display: inline-flex; align-items: center; gap: 6px; color: #0F172A;
             text-decoration: none; font-weight: 700; font-size: 12px; 
-            background: linear-gradient(135deg, #10B981, #059669); 
-            padding: 8px 14px; border-radius: 10px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            background: linear-gradient(135deg, #CBD5E1, #94A3B8); 
+            padding: 8px 14px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
         }
-        .back-btn:hover { background: #000000; transform: translateY(-2px); }
+        .back-btn:hover { background: #0F172A; color: #FFFFFF; transform: translateY(-2px); }
 
       
         h2.card-header {
-            font-size: 20px; font-weight: 800; color: #F0FDF4; text-align: left;
+            font-size: 22px; font-weight: 900; color: #0F172A; text-align: left;
             position: relative; padding-left: 14px; margin-bottom: 4px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            letter-spacing: 0.5px;
         }
         h2.card-header::before {
             content: ''; position: absolute; left: 0; top: 10%; height: 80%; width: 6px;
-            background: linear-gradient(to bottom, #10B981, #059669); border-radius: 6px;
+            background: linear-gradient(to bottom, #0F172A, #3B82F6); border-radius: 6px;
         }
 
         .form-section { 
-            background: linear-gradient(135deg, #F0FDF4 0%, #F8FAF8 100%); 
-            border: 1px solid #A7F3D0; border-radius: 14px; 
+            background: #EEF2FF; 
+            border: 2px solid #CBD5E1; border-radius: 14px; 
             padding: 14px; margin-bottom: 0; position: relative; 
             display: flex; flex-direction: column; gap: 10px; 
-            box-shadow: inset 0 2px 6px rgba(16, 185, 129, 0.03);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
         
         .form-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; width: 100%; }
         .form-group { flex: 1; min-width: 110px; display: flex; flex-direction: column; gap: 4px; }
-        .form-group label { font-size: 11px; color: #065F46; font-weight: 700; white-space: nowrap; letter-spacing: 0.3px; }
+        .form-group label { font-size: 11.5px; color: #1E293B; font-weight: 800; white-space: nowrap; letter-spacing: 0.5px; }
         
         input, select { 
-            width: 100%; padding: 10px; border-radius: 8px; border: 2px solid #CBD5E1; 
-            background: #FFFFFF; color: #0F172A; font-size: 12px; font-weight: 700; 
-            transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02); 
+            width: 100%; padding: 10px; border-radius: 8px; border: 2px solid #94A3B8; 
+            background: #FFFFFF; color: #0F172A; font-size: 12.5px; font-weight: 800; 
+            transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); 
         }
-        input:focus, select:focus { border-color: #10B981; outline: none; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
+        input:focus, select:focus { border-color: #3B82F6; outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
         
-        /* Stunning Individual Grand Colorful Tabs */
         .mgmt-tabs-container {
             display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; 
-            background: #D1FAE5; padding: 5px; border-radius: 12px; margin-bottom: 2px;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+            background: #E2E8F0; padding: 5px; border-radius: 12px; margin-bottom: 2px;
+            border: 1px solid #CBD5E1;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
         }
         .mgmt-tab-btn {
             padding: 8px 4px; font-size: 11px; font-weight: 800; border: none; 
-            background: rgba(255, 255, 255, 0.6); color: #065F46; border-radius: 8px; 
+            background: #FFFFFF; color: #1E293B; border-radius: 8px; 
             cursor: pointer; text-align: center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-transform: uppercase; letter-spacing: 0.5px;
         }
-        .mgmt-tab-btn:hover { background: #FFFFFF; transform: translateY(-1px); }
+        .mgmt-tab-btn:hover { background: #CBD5E1; transform: translateY(-1px); }
         
         .mgmt-tab-btn.active { 
-            background: linear-gradient(135deg, #059669 0%, #10B981 100%); 
+            background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); 
             color: #FFFFFF; 
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); 
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); 
             transform: translateY(-1px);
         }
         
@@ -107,30 +107,28 @@
         .btn-add { background: linear-gradient(135deg, #10B981, #047857); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
         .btn-save { background: linear-gradient(135deg, #3B82F6, #1D4ED8); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
         
-        /* Photo Save Button styling */
         .btn-photo-save { background: linear-gradient(135deg, #8B5CF6, #5B21B6); width: 100%; margin-top: 5px; padding: 12px; font-size: 12px; box-shadow: 0 6px 16px rgba(139, 92, 246, 0.35); }
 
         .custom-upload-btn {
-            background: linear-gradient(135deg, #ECFDF5, #D1FAE5); border: 2px dashed #10B981; color: #047857; padding: 10px;
-            border-radius: 10px; font-weight: 800; font-size: 11px; cursor: pointer; text-align: center;
-            display: block; transition: all 0.3s ease; width: 100%; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);
+            background: linear-gradient(135deg, #FFFFFF, #E2E8F0); border: 2px dashed #94A3B8; color: #1E293B; padding: 10px;
+            border-radius: 10px; font-weight: 800; font-size: 11.5px; cursor: pointer; text-align: center;
+            display: block; transition: all 0.3s ease; width: 100%; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
-        .custom-upload-btn:hover { background: #A7F3D0; transform: translateY(-1px); }
+        .custom-upload-btn:hover { background: #CBD5E1; transform: translateY(-1px); }
 
-        #bitmapPreviewBox { background: #FFFFFF; padding: 8px; border-radius: 10px; border: 2px solid #A7F3D0; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); margin-top: 2px; text-align: center; display: none; }
+        #bitmapPreviewBox { background: #FFFFFF; padding: 8px; border-radius: 10px; border: 2px solid #94A3B8; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); margin-top: 2px; text-align: center; display: none; }
         #bitmapImgTag { width: 100%; max-height: 180px; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: zoom-in; }
 
-        /* Full Screen Excel Spreadsheet Style Modal */
         .fullscreen-view-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(3, 7, 18, 0.95); backdrop-filter: blur(8px); z-index: 9999999;
+            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(8px); z-index: 9999999;
             flex-direction: column; padding: 15px; box-sizing: border-box;
         }
         .fullscreen-view-header {
             display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
-            border-bottom: 2px solid #10B981; padding-bottom: 10px;
+            border-bottom: 2px solid #94A3B8; padding-bottom: 10px;
         }
-        .fullscreen-view-title { color: #34D399; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .fullscreen-view-title { color: #0F172A; font-size: 16px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; }
         .close-view-modal {
             background: #EF4444; color: white; border: none; padding: 8px 16px; border-radius: 8px;
             font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
@@ -139,40 +137,39 @@
             flex: 1; overflow-y: auto; width: 100%; max-width: 1000px; margin: 0 auto;
         }
         .excel-table {
-            width: 100%; border-collapse: collapse; background: #1E293B; border-radius: 12px; overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #334155; font-size: 12px;
+            width: 100%; border-collapse: collapse; background: #FFFFFF; border-radius: 12px; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid #CBD5E1; font-size: 12px;
         }
         .excel-table th {
-            background: #0F172A; color: #34D399; padding: 12px 10px; text-align: left; font-weight: 800;
-            border-bottom: 2px solid #334155; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;
+            background: #0F172A; color: #FFFFFF; padding: 12px 10px; text-align: left; font-weight: 900;
+            border-bottom: 2px solid #CBD5E1; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;
         }
         .excel-table td {
-            padding: 12px 10px; color: #F8FAFC; border-bottom: 1px solid #334155; font-weight: 600; white-space: nowrap;
+            padding: 12px 10px; color: #0F172A; border-bottom: 1px solid #E2E8F0; font-weight: 600; white-space: nowrap;
         }
-        .excel-table tr:hover { background: #334155; }
+        .excel-table tr:hover { background: #F1F5F9; }
         .excel-select-btn {
-            background: linear-gradient(135deg, #10B981, #059669); color: white; border: none; padding: 6px 14px;
-            border-radius: 6px; font-weight: 700; font-size: 11px; cursor: pointer; box-shadow: 0 2px 8px rgba(16,185,129,0.3);
+            background: linear-gradient(135deg, #0F172A, #334155); color: #FFFFFF; border: none; padding: 6px 14px;
+            border-radius: 6px; font-weight: 800; font-size: 11px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             transition: transform 0.2s;
         }
         .excel-select-btn:hover { transform: scale(1.05); }
 
-        /* Modals */
         .choice-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(6px); z-index: 99999;
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(6px); z-index: 99999;
             justify-content: center; align-items: center; padding: 15px;
         }
         .choice-content {
-            background: #FFFFFF; width: 100%; max-width: 320px; border-radius: 20px;
+            background: #F8FAFC; width: 100%; max-width: 320px; border-radius: 20px;
             padding: 24px; display: flex; flex-direction: column; gap: 12px; text-align: center;
-            box-shadow: 0 20px 45px rgba(0,0,0,0.4); border: 2px solid #A7F3D0;
+            box-shadow: 0 20px 45px rgba(0,0,0,0.2); border: 2px solid #94A3B8;
         }
-        .choice-btn { background: #10B981; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; text-align: center; display: block; box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+        .choice-content h4 { color: #0F172A; font-weight: 900; }
+        .choice-btn { background: #10B981; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; text-align: center; display: block; box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
         .choice-btn.gallery { background: #3B82F6; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
         .choice-btn.cancel { background: #EF4444; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
 
-        /* FULL SCREEN IMAGE MODAL */
         .fullscreen-modal { 
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
             background: rgba(0, 0, 0, 0.95); z-index: 999999; justify-content: center; align-items: center; padding: 0; margin: 0;
@@ -187,33 +184,32 @@
 
         .hidden-file-input { opacity: 0; position: absolute; z-index: -1; width: 0; height: 0; }
 
-        /* Custom Weave Dropdown Overlay Styles */
         .weave-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(3, 7, 18, 0.8); backdrop-filter: blur(4px); z-index: 99999;
+            background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); z-index: 99999;
             align-items: center; justify-content: center;
         }
         .weave-dropdown-box {
-            background-color: #1E293B; color: #F8FAFC; width: 90%; max-width: 350px;
+            background-color: #F8FAFC; color: #0F172A; width: 90%; max-width: 350px;
             border-radius: 20px; display: flex; flex-direction: column; overflow: hidden;
-            box-shadow: 0 20px 45px rgba(0,0,0,0.5); border: 2px solid #334155;
+            box-shadow: 0 20px 45px rgba(0,0,0,0.2); border: 2px solid #94A3B8;
         }
         .weave-option {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 16px 20px; font-size: 14px; border-bottom: 1px solid #334155;
+            padding: 16px 20px; font-size: 14px; border-bottom: 1px solid #E2E8F0;
             cursor: pointer; transition: background 0.2s ease; font-weight: 600;
         }
-        .weave-option:active { background-color: #334155; }
+        .weave-option:active { background-color: #F1F5F9; }
         .weave-option:last-child { border-bottom: none; }
         .weave-option input[type="radio"] {
             appearance: none; -webkit-appearance: none; width: 22px; height: 22px;
             border: 2px solid #94A3B8; border-radius: 50%; outline: none; position: relative; cursor: pointer;
         }
-        .weave-option input[type="radio"]:checked { border-color: #34D399; }
+        .weave-option input[type="radio"]:checked { border-color: #0F172A; }
         .weave-option input[type="radio"]:checked::before {
             content: ''; position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%); width: 12px; height: 12px;
-            background: #34D399; border-radius: 50%;
+            background: #0F172A; border-radius: 50%;
         }
     </style>
 </head>
@@ -227,7 +223,7 @@
     <h2 class="card-header">🎨 Design Setup Master</h2>
     
     <!-- DATA RECOVERY BUTTON -->
-    <button onclick="forceCloudRestore()" style="background:linear-gradient(135deg, #3B82F6, #1D4ED8); color:white; padding:12px; border-radius:10px; border:none; font-weight:800; width:100%; margin-bottom:12px; cursor:pointer; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+    <button onclick="forceCloudRestore()" style="background:linear-gradient(135deg, #0F172A, #334155); color:white; padding:12px; border-radius:10px; border:none; font-weight:800; width:100%; margin-bottom:12px; cursor:pointer; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
         ☁️ RECOVER ALL DATA FROM CLOUD
     </button>
 
@@ -280,23 +276,24 @@
             </div>
         </div>
         
-        <hr style="border: 0; height: 1px; background: #A7F3D0; margin: 6px 0;">
+        <hr style="border: 0; height: 1px; background: #CBD5E1; margin: 6px 0;">
 
         <!-- 🟢 Auto-Populating Form Data 🟢 -->
         <div class="form-row">
-    <div class="form-group"><label>Warp 1 (Grnd / Base)</label><input type="text" id="warpCount" placeholder=""></div>
-    <div class="form-group"><label>Warp 2 (Top Beam)</label><input type="text" id="warpCount2" placeholder=""></div>
-    <div class="form-group"><label>Weft 1</label><input type="text" id="weftCount" placeholder=""></div>
-    <div class="form-group"><label>Weft 2</label><input type="text" id="weftCount2" placeholder="-"></div>
-</div>
+            <div class="form-group"><label>Warp 1 (Grnd / Base)</label><input type="text" id="warpCount" placeholder=""></div>
+            <div class="form-group"><label>Warp 2 (Top Beam)</label><input type="text" id="warpCount2" placeholder=""></div>
+            <div class="form-group"><label>Weft 1</label><input type="text" id="weftCount" placeholder=""></div>
+            <div class="form-group"><label>Weft 2</label><input type="text" id="weftCount2" placeholder="-"></div>
+        </div>
 
-<div class="form-row">
-    <div class="form-group"><label>Finish Reed</label><input type="number" id="reed" oninput="updateFinishReed()"></div>
-    <div class="form-group"><label>Finish Pick</label><input type="number" id="pick" oninput="updateFinishPick()"></div>
-    <div class="form-group"><label>Finish Width</label><input type="number" id="width" placeholder="" step="0.01" oninput="updateFinishWidth()"></div>
-</div>
+        <div class="form-row">
+            <div class="form-group"><label>Finish Reed</label><input type="number" id="reed" oninput="updateFinishReed()"></div>
+            <div class="form-group"><label>Finish Pick</label><input type="number" id="pick" oninput="updateFinishPick()"></div>
+            <div class="form-group"><label>Finish Width</label><input type="number" id="width" placeholder="" step="0.01" oninput="updateFinishWidth()"></div>
+        </div>
 
-            <div class="form-group">
+        <div class="form-row">
+            <div class="form-group" style="flex: 100%;">
                 <label>Weave</label>
                 <input type="text" id="weave" readonly placeholder="Select Weave" onclick="openWeaveDropdown()" style="cursor: pointer;">
             </div>
@@ -310,9 +307,9 @@
         </div>
         
         <!-- 🟢 Dedicated Photo Upload Section with Design Selector 🟢 -->
-        <div class="form-group" style="margin-top: 8px; padding-top: 10px; border-top: 2px dashed #A7F3D0;">
-            <label style="font-size: 12px; color: #065F46; margin-bottom: 4px; font-weight: 800;">🖼️ Upload Design Photo</label>
-            <select id="photoDesignSelect" onchange="loadDesignForEdit(this.value)" style="width: 100%; margin-bottom: 10px; border: 2px solid #CBD5E1; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 700;"></select>
+        <div class="form-group" style="margin-top: 8px; padding-top: 10px; border-top: 2px dashed #CBD5E1;">
+            <label style="font-size: 12px; color: #0F172A; margin-bottom: 4px; font-weight: 900;">🖼️ Upload Design Photo</label>
+            <select id="photoDesignSelect" onchange="loadDesignForEdit(this.value)" style="width: 100%; margin-bottom: 10px; border: 2px solid #94A3B8; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 700;"></select>
             <button type="button" class="custom-upload-btn" onclick="openChoiceModal()">📷 Take Photo / 🖼️ Choose from Gallery</button>
             
             <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden-file-input" onchange="handleFileSelect(this)">
@@ -331,7 +328,7 @@
 <!-- Full Screen Excel Spreadsheet Style Modal -->
 <div id="fullscreenViewModal" class="fullscreen-view-modal">
     <div class="fullscreen-view-header">
-        <div class="fullscreen-view-title">📁 All Design Entries Details</div>
+        <div class="fullscreen-view-title" style="color: #FFFFFF;">📁 All Design Entries Details</div>
         <button class="close-view-modal" onclick="closeFullscreenViewModal()">Close ✕</button>
     </div>
     <div class="fullscreen-view-content">
@@ -356,7 +353,7 @@
 <!-- Modals -->
 <div id="choiceModal" class="choice-modal">
     <div class="choice-content">
-        <h4 style="color: #065F46; font-weight: 800;">Select Image Source</h4>
+        <h4 style="color: #0F172A; font-weight: 900;">Select Image Source</h4>
         <label for="cameraInput" class="choice-btn" onclick="setTimeout(closeChoiceModal, 100)">📷 Camera</label>
         <label for="galleryInput" class="choice-btn gallery" onclick="setTimeout(closeChoiceModal, 100)">🖼️ Gallery</label>
         <button class="choice-btn cancel" onclick="closeChoiceModal()">Cancel</button>
@@ -417,7 +414,7 @@
         let html = '';
 
         if(designList.length === 0) {
-            html = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#94A3B8;">No designs found.</td></tr>';
+            html = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#64748B;">No designs found.</td></tr>';
         } else {
             let specs = JSON.parse(localStorage.getItem('design_specs') || '{}');
             let masters = JSON.parse(localStorage.getItem('design_masters_data')) || [];
@@ -436,14 +433,14 @@
 
                 html += `
                     <tr>
-                        <td style="text-align: center; color: #94A3B8; font-weight: 700;">${idx + 1}.</td>
-                        <td style="font-weight: 800; color: #34D399;">${dName}</td>
+                        <td style="text-align: center; color: #64748B; font-weight: 700;">${idx + 1}.</td>
+                        <td style="font-weight: 800; color: #0F172A;">${dName}</td>
                         <td>${fReed}</td>
                         <td>${fPick}</td>
-                        <td style="color: #E2E8F0;">${countsStr}</td>
+                        <td style="color: #334155;">${countsStr}</td>
                         <td style="text-align: center; display: flex; gap: 4px; justify-content: center;">
                             <button class="excel-select-btn" onclick="selectDesignFromModal('${dName}')">Select</button>
-                            <button class="excel-select-btn" style="background:#F59E0B;" onclick="editDesignFromModal('${dName}')">Edit</button>
+                            <button class="excel-select-btn" style="background:#F59E0B; color:#FFF;" onclick="editDesignFromModal('${dName}')">Edit</button>
                         </td>
                     </tr>
                 `;
@@ -681,7 +678,6 @@
             document.getElementById('delBtn').innerText = "⏳...";
             let cleanDelName = cleanDesignName(designNo);
             
-            // Force clean lists directly
             designList = designList.filter(x => cleanDesignName(x) !== cleanDelName);
             
             let preDesigns = JSON.parse(localStorage.getItem('pre_design_numbers')) || [];
