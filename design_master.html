@@ -683,15 +683,12 @@
             document.getElementById('delBtn').innerText = "⏳...";
             let cleanDelName = cleanDesignName(designNo);
             
-            // 1. designList-ல் இருந்து நீக்குதல்
             designList = designList.filter(x => cleanDesignName(x) !== cleanDelName);
             
-            // 2. pre_design_numbers-ல் இருந்து நீக்குதல்
             let preDesigns = JSON.parse(localStorage.getItem('pre_design_numbers')) || [];
             preDesigns = preDesigns.filter(x => cleanDesignName(x) !== cleanDelName);
             localStorage.setItem('pre_design_numbers', JSON.stringify(preDesigns));
 
-            // 3. design_specs-ல் இருந்து நீக்குதல்
             let designSpecs = JSON.parse(localStorage.getItem('design_specs') || '{}');
             let newSpecs = {};
             for(let k in designSpecs) {
@@ -699,7 +696,6 @@
             }
             localStorage.setItem('design_specs', JSON.stringify(newSpecs));
 
-            // 4. design_masters_data (Master list) இல் இருந்தும் முழுமையாக நீக்குதல்
             let designMasters = JSON.parse(localStorage.getItem('design_masters_data')) || [];
             if(Array.isArray(designMasters)) {
                 designMasters = designMasters.filter(m => cleanDesignName(m.name || m.designNo) !== cleanDelName);
@@ -732,7 +728,6 @@
         }
     };
 
-
     window.addDesign = async function() {
         if (!checkUserPermission()) { alert("Access Denied!"); return; }
         
@@ -743,6 +738,11 @@
         let alreadyExists = designList.some(d => cleanDesignName(d) === cleanDNo);
 
         if(alreadyExists) {
+            let activeSelected = document.getElementById('editDesignSelect').value;
+            if (activeSelected && cleanDesignName(activeSelected) === cleanDNo) {
+                updateDesign();
+                return;
+            }
             if(!confirm("இந்த டிசைனுக்கு ஏற்கனவே என்ட்ரி செய்யப்பட்டுள்ளது. மீண்டும் ரீ-என்ட்ரி செய்ய வேண்டுமா?")) return;
             designList = designList.filter(d => cleanDesignName(d) !== cleanDNo);
         }
@@ -824,23 +824,32 @@
 
         let newKey = getSpecKey(newDesignNo);
         
-        // பெயர் மாற்றப்பட்டிருந்தால் பழையதை நீக்கிவிட்டு புதியதைச் சேர்த்தல்
         if (cleanDesignName(oldDesignNo) !== cleanDesignName(newDesignNo)) {
             delete designSpecs[oldKey];
             designSpecs[newKey] = updatedSpecs;
             
             let cleanOld = cleanDesignName(oldDesignNo);
+            
             designList = designList.filter(d => cleanDesignName(d) !== cleanOld);
             
-            // pre_design_numbers-லும் பழையதை நீக்கி புதியதை சேர்த்தல்
             let preDesigns = JSON.parse(localStorage.getItem('pre_design_numbers')) || [];
             preDesigns = preDesigns.filter(x => cleanDesignName(x) !== cleanOld);
             let rawNewName = newDesignInputVal.replace(/#/g, '').trim();
-            if (!preDesigns.includes(rawNewName)) preDesigns.push(rawNewName);
+            if (!preDesigns.some(p => cleanDesignName(p) === cleanDesignName(rawNewName))) {
+                preDesigns.push(rawNewName);
+            }
             localStorage.setItem('pre_design_numbers', JSON.stringify(preDesigns));
+
+            let designMasters = JSON.parse(localStorage.getItem('design_masters_data')) || [];
+            designMasters = designMasters.filter(m => cleanDesignName(m.name || m.designNo) !== cleanOld);
+            localStorage.setItem('design_masters_data', JSON.stringify(designMasters));
 
             if (!designList.some(d => cleanDesignName(d) === cleanDesignName(newDesignNo))) {
                 designList.push(newDesignNo);
+            }
+
+            if (window.supabaseDelete) {
+                await window.supabaseDelete('design_specs', oldKey);
             }
         } else {
             designSpecs[newKey] = updatedSpecs;
@@ -849,14 +858,14 @@
         try {
             await syncDesignMasterToCloud(designList, designSpecs, newDesignNo);
             tempBitmapData = ""; 
-            loadDesignDropdowns(); // டிராப்டவுன் உடனே ரெஃப்ரெஷ் ஆகும்
-            if(window.showNotification) window.showNotification("Design Renamed & Saved Successfully!");
-            else alert("Design Renamed & Saved Successfully!");
+            localStorage.setItem('selected_design_number', newDesignNo);
+            
+            loadDesignDropdowns();
+            alert("Design Renamed & Saved Successfully!");
         } catch (err) {
-            if(window.showNotification) window.showNotification("Error updating! " + err.message, "error");
+            alert("Error updating! " + err.message);
         } finally { document.getElementById('renameBtn').innerText = "💾 Save Edit"; }
     };
-
 
     window.savePhotoOnly = async function() {
         if (!checkUserPermission()) { alert("Access Denied!"); return; }
