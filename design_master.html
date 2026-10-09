@@ -251,23 +251,22 @@
         </div>
 
         <!-- Tab 2: Edit design (Dropdown Listed) -->
-<div id="editPane" class="mgmt-pane">
-    <div class="form-row">
-        <div class="form-group">
-            <label>Select Design to Edit</label>
-            <select id="editDesignSelect" onchange="loadDesignForEdit(this.value)" style="width: 100%;"></select>
+        <div id="editPane" class="mgmt-pane">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Select Design to Edit</label>
+                    <select id="editDesignSelect" onchange="loadDesignForEdit(this.value)" style="width: 100%;"></select>
+                </div>
+                <!-- Rename Design Input -->
+                <div class="form-group" style="flex: 1;">
+                    <label>Rename Design</label>
+                    <input type="text" id="renameDesignInput" placeholder="New Name / No" style="width: 100%;">
+                </div>
+                <div style="display: flex; gap: 6px; align-items: flex-end;">
+                    <button class="action-btn btn-edit" id="renameBtn" onclick="updateDesignWithConfirm()" style="height: 42px;">💾 Save Edit</button>
+                </div>
+            </div>
         </div>
-        <!-- Inku Design Rename / Edit seyyaveyana input matrum save option-ai seerkalam -->
-        <div class="form-group" style="flex: 1;">
-            <label>Rename Design</label>
-            <input type="text" id="renameDesignInput" placeholder="New Name / No" style="width: 100%;">
-        </div>
-        <div style="display: flex; gap: 6px; align-items: flex-end;">
-            <button class="action-btn btn-edit" id="renameBtn" onclick="updateDesignWithConfirm()" style="height: 42px;">💾 Save Edit</button>
-        </div>
-    </div>
-</div>
-
 
         <!-- Tab 3: Delete design (Dropdown Listed) -->
         <div id="deletePane" class="mgmt-pane">
@@ -790,14 +789,17 @@
     window.updateDesign = async function() {
         if (!checkUserPermission()) { alert("Access Denied!"); return; }
         
-        let designNo = document.getElementById('editDesignSelect').value;
-        if(!designNo) { alert("Select Design First from Edit dropdown!"); return; }
+        let oldDesignNo = document.getElementById('editDesignSelect').value;
+        if(!oldDesignNo) { alert("Select Design First from Edit dropdown!"); return; }
+        
+        let newDesignInputVal = document.getElementById('renameDesignInput').value.trim();
+        let newDesignNo = newDesignInputVal ? formatDisplayDesignName(newDesignInputVal) : oldDesignNo;
         
         document.getElementById('renameBtn').innerText = "⏳...";
         
         let designSpecs = JSON.parse(localStorage.getItem('design_specs') || '{}');
-        let key = getSpecKey(designNo);
-        let existing = designSpecs[key] || {};
+        let oldKey = getSpecKey(oldDesignNo);
+        let existing = designSpecs[oldKey] || {};
         
         let finalBitmap = (tempBitmapData && tempBitmapData !== "") ? tempBitmapData : (existing.bitmap || "");
         let warp1 = document.getElementById('warpCount').value.trim();
@@ -815,12 +817,27 @@
             typeOfProcess: document.getElementById('typeOfProcess').value.trim(), status: existing.status || 'running', bitmap: finalBitmap 
         };
 
-        designSpecs[key] = updatedSpecs;
+        let newKey = getSpecKey(newDesignNo);
+        
+        if (cleanDesignName(oldDesignNo) !== cleanDesignName(newDesignNo)) {
+            delete designSpecs[oldKey];
+            designSpecs[newKey] = updatedSpecs;
+            
+            let cleanOld = cleanDesignName(oldDesignNo);
+            designList = designList.filter(d => cleanDesignName(d) !== cleanOld);
+            if (!designList.some(d => cleanDesignName(d) === cleanDesignName(newDesignNo))) {
+                designList.push(newDesignNo);
+            }
+        } else {
+            designSpecs[newKey] = updatedSpecs;
+        }
         
         try {
-            await syncDesignMasterToCloud(designList, designSpecs, designNo);
+            await syncDesignMasterToCloud(designList, designSpecs, newDesignNo);
             tempBitmapData = ""; 
-            if(window.showNotification) window.showNotification("Design Details Saved!");
+            loadDesignDropdowns();
+            if(window.showNotification) window.showNotification("Design Renamed & Saved Successfully!");
+            else alert("Design Renamed & Saved Successfully!");
         } catch (err) {
             if(window.showNotification) window.showNotification("Error updating! " + err.message, "error");
         } finally { document.getElementById('renameBtn').innerText = "💾 Save Edit"; }
@@ -888,6 +905,9 @@
             let el = document.getElementById(id);
             if(el && el.value !== val) el.value = val;
         });
+
+        let renameInput = document.getElementById('renameDesignInput');
+        if(renameInput) renameInput.value = val;
 
         if(val) {
             let specs = JSON.parse(localStorage.getItem('design_specs') || '{}');
