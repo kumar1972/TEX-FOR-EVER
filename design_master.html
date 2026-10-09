@@ -251,17 +251,23 @@
         </div>
 
         <!-- Tab 2: Edit design (Dropdown Listed) -->
-        <div id="editPane" class="mgmt-pane">
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Select Design to Edit</label>
-                    <select id="editDesignSelect" onchange="loadDesignForEdit(this.value)" style="width: 100%;"></select>
-                </div>
-                <div style="display: flex; gap: 6px; align-items: flex-end;">
-                    <button class="action-btn btn-edit" id="renameBtn" onclick="updateDesignWithConfirm()" style="height: 42px;">💾 Save Edit</button>
-                </div>
-            </div>
+<div id="editPane" class="mgmt-pane">
+    <div class="form-row">
+        <div class="form-group">
+            <label>Select Design to Edit</label>
+            <select id="editDesignSelect" onchange="loadDesignForEdit(this.value)" style="width: 100%;"></select>
         </div>
+        <!-- Inku Design Rename / Edit seyyaveyana input matrum save option-ai seerkalam -->
+        <div class="form-group" style="flex: 1;">
+            <label>Rename Design</label>
+            <input type="text" id="renameDesignInput" placeholder="New Name / No" style="width: 100%;">
+        </div>
+        <div style="display: flex; gap: 6px; align-items: flex-end;">
+            <button class="action-btn btn-edit" id="renameBtn" onclick="updateDesignWithConfirm()" style="height: 42px;">💾 Save Edit</button>
+        </div>
+    </div>
+</div>
+
 
         <!-- Tab 3: Delete design (Dropdown Listed) -->
         <div id="deletePane" class="mgmt-pane">

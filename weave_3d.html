@@ -346,52 +346,86 @@ input, select {
 .main-actions { display: grid; grid-template-columns: 1fr; gap: 6px; margin-top: 6px; }
 .main-actions button { width: 100%; }
 
-/* FULLSCREEN SIMULATION */
-.fs-modal { display: none; position: fixed; inset: 0; width: 100vw; height: 100vh; background: #000; z-index: 999999; flex-direction: column; }
-.fs-header { height: 48px; min-height: 48px; padding: 6px 12px; display: flex; align-items: center; justify-content: space-between; background: #14251e; border-bottom: 1px solid #345947; }
-.fs-title { color: #9be4a8; font-size: .85rem; font-weight: 900; }
-.fs-header-actions { display: flex; gap: 8px; align-items: center; }
-.fs-header button { border: 0; border-radius: 6px; padding: 6px 14px; color: #fff; font-weight: 800; font-size: .7rem; cursor: pointer; }
-.fs-content { flex: 1; width: 100vw; height: calc(100vh - 48px - 72px); display: flex; align-items: center; justify-content: center; overflow: hidden; background: #060c09; touch-action: none; position: relative; }
-.fs-content canvas { width: 100%; height: 100%; display: block; touch-action: none; }
-.fs-hint { position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); background: rgba(20,37,30,.88); color: #b8d8bf; padding: 3px 10px; border-radius: 20px; font-size: .52rem; pointer-events: none; white-space: nowrap; z-index: 10; display:flex; align-items:center; gap:8px; }
+/* FULLSCREEN SIMULATION - FULL SCREEN / IMMERSIVE VIEW */
+.fs-modal { 
+    display: none; 
+    position: fixed; 
+    inset: 0; 
+    width: 100vw; 
+    height: 100vh; 
+    background: #060c09; 
+    z-index: 999999; 
+    flex-direction: column; 
+}
+.fs-header { 
+    height: 48px; 
+    min-height: 48px; 
+    padding: 4px 8px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    background: #14251e; 
+    border-bottom: 1px solid #345947; 
+    flex-wrap: nowrap;
+    gap: 4px;
+}
+.fs-title { color: #9be4a8; font-size: .75rem; font-weight: 900; white-space: nowrap; }
+.fs-header-actions { display: flex; gap: 4px; align-items: center; flex-wrap: nowrap; }
+.fs-header button { border: 0; border-radius: 6px; padding: 4px 8px; color: #fff; font-weight: 800; font-size: .65rem; cursor: pointer; white-space: nowrap; }
 
-/* EFFECT BAR */
+/* EFFECT BAR INTEGRATED */
 .effect-bar {
     width: 100vw;
     background: #0f241a;
     border-bottom: 1px solid #3e6d53;
-    padding: 6px 12px;
+    padding: 4px 8px;
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
     z-index: 20;
     box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+    font-size: 0.65rem;
+    font-weight: 900;
+    color: #edf7ef;
+    min-height: 34px;
 }
 .effect-group {
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: 0.72rem;
-    font-weight: 900;
-    color: #edf7ef;
-    width: 100%;
+    gap: 4px;
+    flex: 1;
 }
 .effect-group input[type="range"] {
     flex: 1;
-    height: 6px;
+    height: 4px;
     accent-color: #22c55e;
     cursor: pointer;
     background: #244638;
     border-radius: 4px;
 }
 .effect-group input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
+    width: 14px;
+    height: 14px;
     accent-color: #22c55e;
     cursor: pointer;
     flex-shrink: 0;
 }
+
+.fs-content { 
+    flex: 1; 
+    width: 100vw; 
+    height: calc(100vh - 48px - 34px); 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    overflow: hidden; 
+    background: #060c09; 
+    touch-action: none; 
+    position: relative; 
+}
+.fs-content canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+.fs-hint { position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); background: rgba(20,37,30,.88); color: #b8d8bf; padding: 3px 10px; border-radius: 20px; font-size: .52rem; pointer-events: none; white-space: nowrap; z-index: 10; display:flex; align-items:center; gap:8px; }
 
 /* CAD PRINT MODAL */
 .cad-print-modal {
@@ -415,7 +449,7 @@ input, select {
     color: #edf7ef;
 }
 
-/* PRINT DESIGN MODAL RE-STYLING (Matching Image) */
+/* PRINT DESIGN MODAL RE-STYLING */
 .print-modal { display: none; position: fixed; inset: 0; background: #e5e7eb; z-index: 1000000; justify-content: center; align-items: flex-start; padding: 20px; overflow-y: auto; }
 .print-sheet { background: #fff; color: #111827; width: 100%; max-width: 860px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: none; overflow: hidden; margin: auto; }
 .print-sheet-inner { padding: 20px; background: #fff; }
@@ -566,39 +600,50 @@ input, select {
 <!-- FULLSCREEN 3D SIMULATION -->
 <div id="fsModal" class="fs-modal">
     <div class="fs-header">
-        <div class="fs-title">🧊 3D Weave Preview Pro</div>
+        <div class="fs-title">🧊 3D Weave Pro</div>
         <div class="fs-header-actions">
+            <!-- No. of Repeat Menu Tab Added Here -->
             <div style="display:inline-flex; align-items:center; gap:2px; background:#0d1c16; border:1px solid #345947; border-radius:6px; padding:2px 4px;">
-                <span style="font-size:0.62rem; color:#8fe19d; font-weight:bold; margin-right:2px;">📏 Ruler Cal:</span>
-                <button style="background:#203b30; color:#fff; border:0; padding:2px 6px; font-size:0.75rem; border-radius:3px;" onclick="adjustRulerDpi(-0.05)" title="Scale Down">-</button>
-                <span id="rulerCalDisplay" style="font-size:0.65rem; color:#f59e0b; min-width:28px; text-align:center;">100%</span>
-                <button style="background:#203b30; color:#fff; border:0; padding:2px 6px; font-size:0.75rem; border-radius:3px;" onclick="adjustRulerDpi(0.05)" title="Scale Up">+</button>
+                <span style="font-size:0.55rem; color:#8fe19d; font-weight:bold;">🔁 Rep:</span>
+                <select id="fsRepeatSelect" onchange="changeSimulationRepeats(this.value)" style="background:#203b30; color:#fff; border:0; padding:2px; font-size:0.65rem; border-radius:3px; width:auto; min-height:auto; height:22px;">
+                    <option value="1">1x</option>
+                    <option value="2" selected>2x</option>
+                    <option value="3">3x</option>
+                    <option value="4">4x</option>
+                </select>
             </div>
-            <button style="background:#244638;border:1px solid #39614f;" onclick="refreshFullscreen3D()">↺ 1:1 Reset</button>
-            <button style="background:#217eaf;font-size:0.75rem;padding:6px 14px;" onclick="openCadPrintModal()">🖨️ Print CAD (A4)</button>
-            <button style="background:#ef4444;font-size:0.75rem;padding:6px 14px;" onclick="closeFullscreen()">✖ Close</button>
+
+            <div style="display:inline-flex; align-items:center; gap:2px; background:#0d1c16; border:1px solid #345947; border-radius:6px; padding:2px 4px;">
+                <span style="font-size:0.55rem; color:#8fe19d; font-weight:bold;">📏:</span>
+                <button style="background:#203b30; color:#fff; border:0; padding:2px 4px; font-size:0.7rem; border-radius:3px;" onclick="adjustRulerDpi(-0.05)" title="Scale Down">-</button>
+                <span id="rulerCalDisplay" style="font-size:0.6rem; color:#f59e0b; min-width:22px; text-align:center;">100%</span>
+                <button style="background:#203b30; color:#fff; border:0; padding:2px 4px; font-size:0.7rem; border-radius:3px;" onclick="adjustRulerDpi(0.05)" title="Scale Up">+</button>
+            </div>
+            <button style="background:#244638;border:1px solid #39614f;" onclick="refreshFullscreen3D()">↺</button>
+            <button style="background:#217eaf;font-size:0.7rem;padding:4px 8px;" onclick="openCadPrintModal()">🖨️ CAD</button>
+            <button style="background:#ef4444;font-size:0.7rem;padding:4px 8px;" onclick="closeFullscreen()">✖</button>
         </div>
     </div>
 
     <div class="effect-bar">
         <div class="effect-group">
             <input type="checkbox" id="fsSeerCheck" onchange="syncEffects('seer')">
-            <span>🌊 3D Seersucker Puff:</span>
+            <span>🌊 Puff:</span>
             <input type="range" id="seerIntensity" min="5" max="100" value="50" oninput="debounce3DRender()" title="Seersucker 3D Wave Depth">
-            <span id="seerValDisplay" style="color:#f59e0b; min-width:38px;">75%</span>
+            <span id="seerValDisplay" style="color:#f59e0b; min-width:24px;">75%</span>
         </div>
         <div class="effect-group">
             <input type="checkbox" id="fsBrushCheck" onchange="syncEffects('brush')">
-            <span>🪶 Micro-Fibre Brush:</span>
+            <span>🪶 Brush:</span>
             <input type="range" id="brushIntensity" min="1" max="200" value="100" oninput="debounce3DRender()" title="Micro-Fibre Density">
-            <span id="brushValDisplay" style="color:#78d18a; min-width:38px;">100%</span>
+            <span id="brushValDisplay" style="color:#78d18a; min-width:24px;">100%</span>
         </div>
     </div>
 
     <div id="fsContent" class="fs-content">
         <canvas id="weaveCanvas"></canvas>
         <div class="fs-hint">
-            <span>👆 Drag All-over Scroll</span> • <span>🤏 Pinch In/Out Zoom</span> • <span>📏 Actual Steel Ruler Size</span>
+            <span>👆 Drag Scroll</span> • <span>🤏 Pinch Zoom</span> • <span>📏 Ruler Active</span>
         </div>
     </div>
 </div>
@@ -726,6 +771,12 @@ let selectedColourForPopup = null;
 let colourPopupTarget = { type: null, index: null };
 let liveDesignDimensions = { widthCm: 0, heightCm: 0 };
 let selectedCadScalePercent = 100;
+let simulationRepeatFactor = 2;
+
+function changeSimulationRepeats(val) {
+    simulationRepeatFactor = parseInt(val) || 2;
+    debounce3DRender();
+}
 
 let rulerCalibrationMultiplier = 1.0;
 let singleW_cm = 0;
@@ -1657,7 +1708,7 @@ async function saveCurrentDesign() {
         draw3DWeave(); 
 
         setStatus("✅ Saved Locally");
-        alert("✅ 3D Design & Colors வெற்றிகரமாக Save ஆகிவிட்டது! (Weft/Warp பேஜ்களில் எந்த மாற்றமும் நடக்காது)");
+        alert("✅ 3D Design & Colors வெற்றிகரமாக Save ஆகிவிட்டது!");
 
     } catch(error) { 
         alert("Error: " + error.message);
@@ -1971,18 +2022,17 @@ function draw3DWeave(){
         if(!baseWarp.length){ baseWarp = [{r:30,g:58,b:138}, {r:255,g:255,b:255}]; warpSeerMap = [false, false]; baseWarpYarnInfo = [{thicknessMultiplier: 1.0, diameter_mm: 0.14}, {thicknessMultiplier: 1.0, diameter_mm: 0.14}]; }
         if(!baseWeft.length){ baseWeft = [{r:239,g:68,b:68}, {r:30,g:58,b:138}]; baseWeftYarnInfo = [{thicknessMultiplier: 1.0, diameter_mm: 0.14}, {thicknessMultiplier: 1.0, diameter_mm: 0.14}]; }
         
-        const singleWarp = baseWarp.slice(); 
-        const singleWeft = baseWeft.slice();
-        
-        const extraWarpCount = Math.max(1, Math.round(singleWarp.length * 0.25));
-        const warp = [...singleWarp, ...singleWarp.slice(0, extraWarpCount)]; 
-        const seerMap = [...warpSeerMap, ...warpSeerMap.slice(0, extraWarpCount)]; 
-        const warpYarnInfos = [...baseWarpYarnInfo, ...baseWarpYarnInfo.slice(0, extraWarpCount)];
+        let warp = []; let seerMap = []; let warpYarnInfos = [];
+        let weft = []; let weftYarnInfos = [];
 
-        const extraWeftCount = Math.max(1, Math.round(singleWeft.length * 0.25));
-        const weft = [...singleWeft, ...singleWeft.slice(0, extraWeftCount)];
-        const weftYarnInfos = [...baseWeftYarnInfo, ...baseWeftYarnInfo.slice(0, extraWeftCount)];
-        
+        for (let rep = 0; rep < simulationRepeatFactor; rep++) {
+            warp.push(...baseWarp);
+            seerMap.push(...warpSeerMap);
+            warpYarnInfos.push(...baseWarpYarnInfo);
+            weft.push(...baseWeft);
+            weftYarnInfos.push(...baseWeftYarnInfo);
+        }
+
         const realWarpLength = warp.length; 
         const realWeftLength = weft.length;
         
@@ -1993,14 +2043,14 @@ function draw3DWeave(){
         const physW_mm = (realWarpLength / reed) * 25.4; 
         const physH_mm = (realWeftLength / pick) * 25.4;
         
-        const singleWarpVal = singleWarp.length;
-        const singleWeftVal = singleWeft.length;
+        const singleWarpVal = baseWarp.length;
+        const singleWeftVal = baseWeft.length;
         singleW_mm = (singleWarpVal / reed) * 25.4;
         singleH_mm = (singleWeftVal / pick) * 25.4;
         singleW_cm = singleW_mm / 10;
         singleH_cm = singleH_mm / 10;
-        const physW_cm = singleW_cm;
-        const physH_cm = singleH_cm;
+        const physW_cm = physW_mm / 10;
+        const physH_cm = physH_mm / 10;
         liveDesignDimensions = { widthCm: physW_cm, heightCm: physH_cm, singleW_cm: singleW_cm, singleH_cm: singleH_cm, singleW_mm: singleW_mm, singleH_mm: singleH_mm };
         
         let rawDent = $("dentingPatternInput")?.value || activeDesignObj?.dentingPatternFormula || activeDesignObj?.dentingPattern || "2";
@@ -2811,14 +2861,16 @@ async function executeRealA4Print(isPdfMode = false) {
         const singleWarp = baseWarp.slice();
         const singleWeft = baseWeft.slice();
 
-        const extraWarpCount = Math.max(1, Math.round(singleWarp.length * 0.25));
-        const warp = [...singleWarp, ...singleWarp.slice(0, extraWarpCount)];
-        const seerMap = [...warpSeerMap, ...warpSeerMap.slice(0, extraWarpCount)];
-        const warpYarnInfos = [...baseWarpYarnInfo, ...baseWarpYarnInfo.slice(0, extraWarpCount)];
+        const warp = []; const seerMap = []; const warpYarnInfos = [];
+        const weft = []; const weftYarnInfos = [];
 
-        const extraWeftCount = Math.max(1, Math.round(singleWeft.length * 0.25));
-        const weft = [...singleWeft, ...singleWeft.slice(0, extraWeftCount)];
-        const weftYarnInfos = [...baseWeftYarnInfo, ...baseWeftYarnInfo.slice(0, extraWarpCount)];
+        for (let rep = 0; rep < simulationRepeatFactor; rep++) {
+            warp.push(...baseWarp);
+            seerMap.push(...warpSeerMap);
+            warpYarnInfos.push(...baseWarpYarnInfo);
+            weft.push(...baseWeft);
+            weftYarnInfos.push(...baseWeftYarnInfo);
+        }
 
         const realWarpLength = warp.length;
         const realWeftLength = weft.length;
@@ -3097,6 +3149,27 @@ async function executeRealA4Print(isPdfMode = false) {
 
         const isPortrait = parseFloat(totalPrintH_cm) >= parseFloat(totalPrintW_cm);
 
+        if (isPdfMode) {
+            const byteString = atob(dataURL.split(',')[1]);
+            const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            const blob = new Blob([ab], {type: mimeString});
+            const blobUrl = URL.createObjectURL(blob);
+            let dName = activeDesignObj ? designName(activeDesignObj) : "3D_Weave_CAD";
+            let link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = `${dName}_CAD_Print.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            closeCadPrintModal();
+            return;
+        }
+
         if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Printer) {
             try {
                 await window.Capacitor.Plugins.Printer.print({
@@ -3143,12 +3216,7 @@ async function executeRealA4Print(isPdfMode = false) {
             const doPrint = function() {
                 try {
                     printWin.focus();
-                    if (isPdfMode) {
-                        // User requested direct PDF save/print prompt without triggering external picker dialog if possible
-                        printWin.print();
-                    } else {
-                        printWin.print();
-                    }
+                    printWin.print();
                     setTimeout(() => { printWin.close(); }, 500);
                 } catch(e) {}
             };

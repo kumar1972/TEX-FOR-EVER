@@ -1220,7 +1220,7 @@ window.addEventListener("DOMContentLoaded", function () {
 });
 
 // ============================================================
-// GLOBAL THEME ENGINE
+// GLOBAL THEME ENGINE (FIXED INPUTS, HEADERS & TYPING BOX COLORS)
 // ============================================================
 
 (function () {
@@ -1241,6 +1241,16 @@ window.addEventListener("DOMContentLoaded", function () {
             margin-left: auto !important;
             margin-right: auto !important;
         }
+        input[type="text"], input[type="number"], input[type="date"], input[type="password"], input[type="email"], select, textarea {
+            background-color: #FFFFFF !important;
+            color: #0F172A !important;
+            font-weight: 700 !important;
+            border: 1.5px solid #38BDF8 !important;
+        }
+        input::placeholder, textarea::placeholder {
+            color: #64748B !important;
+            font-weight: 600 !important;
+        }
         `;
 
         if (savedMode === "dark") {
@@ -1250,7 +1260,7 @@ window.addEventListener("DOMContentLoaded", function () {
             .stats-banner, .stat-box { background: #111827 !important; color: #F8FAFC !important; border-color: #38BDF8 !important; }
             .stat-value, .live-clock { color: #38BDF8 !important; }
             .menu-btn { border-color: #38BDF8 !important; }
-            input, select, textarea { background: #FFFFFF !important; color: #111827 !important; border-color: #CBD5E1 !important; }
+            input, select, textarea { background: #FFFFFF !important; color: #0F172A !important; border-color: #38BDF8 !important; }
             `;
         } else if (savedMode === "softgreen") {
             css += `
@@ -1259,7 +1269,7 @@ window.addEventListener("DOMContentLoaded", function () {
             .stats-banner, .stat-box { background: #ECFDF5 !important; color: #064E3B !important; border-color: #34D399 !important; }
             .stat-value, .live-clock { color: #059669 !important; }
             .menu-btn { border-color: #34D399 !important; }
-            input, select, textarea { background: #FFFFFF !important; color: #064E3B !important; border-color: #A7F3D0 !important; }
+            input, select, textarea { background: #FFFFFF !important; color: #064E3B !important; border-color: #10B981 !important; }
             `;
         } else if (savedMode === "darkgreen") {
             css += `
@@ -1268,7 +1278,7 @@ window.addEventListener("DOMContentLoaded", function () {
             .stats-banner, .stat-box { background: #075E45 !important; color: #ECFDF5 !important; border-color: #22C55E !important; }
             .stat-value, .live-clock { color: #4ADE80 !important; }
             .menu-btn { border-color: #22C55E !important; }
-            input, select, textarea { background: #FFFFFF !important; color: #064E3B !important; border-color: #86EFAC !important; }
+            input, select, textarea { background: #FFFFFF !important; color: #064E3B !important; border-color: #22C55E !important; }
             `;
         } else if (savedMode === "sunset") {
             css += `
@@ -1277,7 +1287,7 @@ window.addEventListener("DOMContentLoaded", function () {
             .stats-banner, .stat-box { background: #6B3508 !important; color: #FFF7ED !important; border-color: #FBBF24 !important; }
             .stat-value, .live-clock { color: #FBBF24 !important; }
             .menu-btn { border-color: #F59E0B !important; }
-            input, select, textarea { background: #FFFFFF !important; color: #7C2D12 !important; border-color: #FCD34D !important; }
+            input, select, textarea { background: #FFFFFF !important; color: #7C2D12 !important; border-color: #F59E0B !important; }
             `;
         } else if (savedMode === "royalblue") {
             css += `
@@ -1286,7 +1296,7 @@ window.addEventListener("DOMContentLoaded", function () {
             .stats-banner, .stat-box { background: #1E3A8A !important; color: #EEF2FF !important; border-color: #818CF8 !important; }
             .stat-value, .live-clock { color: #A5B4FC !important; }
             .menu-btn { border-color: #818CF8 !important; }
-            input, select, textarea { background: #FFFFFF !important; color: #172554 !important; border-color: #A5B4FC !important; }
+            input, select, textarea { background: #FFFFFF !important; color: #172554 !important; border-color: #6366F1 !important; }
             `;
         }
 
@@ -1481,3 +1491,34 @@ console.log("☁️ Supabase: " + (window.isCloudSyncActive() ? "ENABLED" : "DIS
 console.log("💾 LocalStorage: ENABLED (Backed by IndexedDB)");
 console.log("📴 Offline Queue: ENABLED");
 console.log("================================================");
+
+// --- Global Print & Style Injector ---
+window.addEventListener('DOMContentLoaded', () => {
+    // 1. Global Print Function (எந்தப் பக்கத்திலும் பிரிண்ட் செய்ய)
+    window.handleGlobalPrint = function() {
+        window.print();
+    };
+
+    // 2. Automatically inject Print CSS to avoid editing every HTML file
+    if (!document.getElementById('global-print-style')) {
+        const printStyle = document.createElement('style');
+        printStyle.id = 'global-print-style';
+        printStyle.innerHTML = `
+        @media print {
+            .top-nav, .mgmt-tabs-container, .action-btn, button, .custom-upload-btn, .choice-modal, header, footer, .back-btn {
+                display: none !important;
+            }
+            body {
+                background: #FFFFFF !important;
+                color: #000000 !important;
+            }
+            .main-card {
+                border: none !important;
+                box-shadow: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+        }`;
+        document.head.appendChild(printStyle);
+    }
+});
