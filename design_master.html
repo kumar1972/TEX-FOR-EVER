@@ -536,14 +536,17 @@
         let masters = JSON.parse(localStorage.getItem('design_masters_data')) || [];
         
         let masterNames = Array.isArray(masters) ? masters.map(d => d.name || d.designNo).filter(Boolean) : [];
-        let allRawNames = [...preDesigns, ...masterNames, ...Object.keys(specs)];
+        let allRawNames = [...new Set([...preDesigns, ...masterNames, ...Object.keys(specs)])];
         
         let uniqueCleanNames = new Set();
         designList = [];
         
         allRawNames.forEach(rawName => {
             let cln = cleanDesignName(rawName);
-            if(cln && !uniqueCleanNames.has(cln)) {
+            let hasSpec = Object.keys(specs).some(k => cleanDesignName(k) === cln);
+            
+            // design_specs-ல் உண்மையிலேயே டேட்டா உள்ளவை மற்றும் மாஸ்டரில் உள்ளவை மட்டும் எடுக்கப்படும்
+            if(cln && (hasSpec || masterNames.some(m => cleanDesignName(m) === cln)) && !uniqueCleanNames.has(cln)) {
                 uniqueCleanNames.add(cln);
                 designList.push(formatDisplayDesignName(rawName)); 
             }
@@ -704,9 +707,10 @@
             
             try {
                 localStorage.removeItem('selected_design_number');
+                let delKey = getSpecKey(designNo) || designNo;
                 if (window.supabaseDelete) {
-                    let delKey = getSpecKey(designNo) || designNo;
                     await window.supabaseDelete('design_specs', delKey);
+                    await window.supabaseDelete('design_masters_data', delKey);
                     await window.supabaseDelete('weave_designs', delKey); 
                     await window.supabaseDelete('denting_drawing_data', delKey);
                     await window.supabaseDelete('warp_entry_data', delKey);
@@ -721,9 +725,10 @@
                 alert("Design Deleted Successfully!");
                 loadDesignDropdowns(); 
                 clearForm();
+                window.location.reload();
                 
             } catch (err) {
-                if(window.showNotification) window.showNotification("Error deleting! " + err.message, "error");
+                alert("Error deleting! " + err.message);
             } finally { document.getElementById('delBtn').innerText = "🗑️ Delete"; }
         }
     };
@@ -850,6 +855,7 @@
 
             if (window.supabaseDelete) {
                 await window.supabaseDelete('design_specs', oldKey);
+                await window.supabaseDelete('design_masters_data', oldKey);
             }
         } else {
             designSpecs[newKey] = updatedSpecs;

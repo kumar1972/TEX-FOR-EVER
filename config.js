@@ -1494,10 +1494,20 @@ console.log("================================================");
 
 // --- Global Print & Style Injector ---
 window.addEventListener('DOMContentLoaded', () => {
-    // 1. Global Print Function (எந்தப் பக்கத்திலும் பிரிண்ட் செய்ய)
-    window.handleGlobalPrint = function() {
+
+  // 1. Global Print Function (Capacitor Android Printer Integration)
+window.handleGlobalPrint = function(htmlContent) {
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Printer) {
+        window.Capacitor.Plugins.Printer.print({
+            content: htmlContent || document.documentElement.innerHTML
+        }).catch(err => {
+            console.error("Printer Plugin Error:", err);
+            window.print();
+        });
+    } else {
         window.print();
-    };
+    }
+};
 
     // 2. Automatically inject Print CSS to avoid editing every HTML file
     if (!document.getElementById('global-print-style')) {

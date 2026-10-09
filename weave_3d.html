@@ -3509,7 +3509,6 @@ window.addEventListener("focus", () => {
         if(cModal) cModal.style.display = "none";
     }, 250);
 });
-
 async function triggerRealPrint() {
     let fs = $("fsModal");
     let wasFsOpen = fs && fs.style.display === "flex";
@@ -3527,10 +3526,18 @@ async function triggerRealPrint() {
             });
         } catch (err) {
             console.error("Native print error:", err);
-            window.print();
+            if (typeof window.handleGlobalPrint === "function") {
+                window.handleGlobalPrint();
+            } else {
+                window.print();
+            }
         }
     } else {
-        window.print();
+        if (typeof window.handleGlobalPrint === "function") {
+            window.handleGlobalPrint();
+        } else {
+            window.print();
+        }
     }
 
     setTimeout(() => {
@@ -3542,6 +3549,7 @@ async function triggerRealPrint() {
         }
     }, 300);
 }
+
 
 function updatePrintOrientation() {
     let orientation = $("printOrientation")?.value || "portrait";

@@ -2451,16 +2451,17 @@ function closePreviewModal(){
     },150);
 
 }
-
-
 /* =========================================================
    PRINT / PREVIEW
 ========================================================= */
 
 function printPreview(){
-
-    window.print();
-
+    // Capacitor மற்றும் WebView இரண்டிலும் சரியாக பிரிண்ட் அல்லது PDF டயலாக் வர இது உதவும்
+    if (typeof window.handleGlobalPrint === "function") {
+        window.handleGlobalPrint();
+    } else {
+        window.print();
+    }
 }
 
 </script>
