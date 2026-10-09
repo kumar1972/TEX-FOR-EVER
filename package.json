@@ -61,6 +61,8 @@
   "devDependencies": {
     "electron": "^38.0.0",
     "electron-builder": "^26.0.0",
-    "cordova": "^13.0.0"
+    "cordova": "^13.0.0",
+    "cordova-plugin-printer": "^0.7.3"
   }
+
 }
