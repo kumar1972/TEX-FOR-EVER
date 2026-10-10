@@ -71,6 +71,8 @@ body{
     background:#1A2421;
     padding:7px 14px;
     border-radius:8px;
+    border:none;
+    cursor:pointer;
 }
 
 /* =========================================================
@@ -119,6 +121,7 @@ body{
     border-radius:7px;
     font-size:10px;
     font-weight:700;
+    cursor:pointer;
 }
 
 /* =========================================================
@@ -552,7 +555,7 @@ th{
         background:#ffffff !important;
     }
 
-    .no-print{
+    .hide-on-print, .no-print{
         display:none !important;
     }
 
@@ -714,19 +717,20 @@ th{
 
 <div class="main-card">
 
-    <div class="top-nav no-print">
-        <a href="dashboard.html" class="back-btn">
+    <div class="top-nav hide-on-print">
+        <button type="button" class="back-btn" onclick="navigateDashboard(event)">
             ← மெனுவிற்குச் செல்ல
-        </a>
+        </button>
     </div>
 
-    <div class="header-bar">
+    <div class="header-bar hide-on-print">
 
         <h3>📋 டிசைன் ஷீட் பிரிண்ட்</h3>
 
         <button
-            class="preview-btn no-print"
-            onclick="openPreviewModal()">
+            type="button"
+            class="preview-btn"
+            onclick="openPreviewModal(event)">
             👁️ Preview
         </button>
 
@@ -746,7 +750,7 @@ th{
     </div>
 
     <!-- DESIGN SELECT -->
-    <div class="top-form-row-single no-print">
+    <div class="top-form-row-single hide-on-print">
 
         <div class="form-group">
 
@@ -960,7 +964,7 @@ th{
 
     <div class="modal-content">
 
-        <div class="modal-header no-print">
+        <div class="modal-header hide-on-print">
 
             <h3>
                 👁️ Design Sheet Print Preview
@@ -969,14 +973,16 @@ th{
             <div class="modal-actions">
 
                 <button
+                    type="button"
                     class="print-btn"
-                    onclick="printPreview()">
+                    onclick="executePrint(event)">
                     🖨️ Print
                 </button>
 
                 <button
+                    type="button"
                     class="close-btn"
-                    onclick="closePreviewModal()">
+                    onclick="closePreviewModal(event)">
                     Close ✕
                 </button>
 
@@ -2280,7 +2286,11 @@ function buildTableRowsHtml(rows){
    OPEN PREVIEW
 ========================================================= */
 
-function openPreviewModal(){
+function openPreviewModal(e){
+    if(e){
+        e.preventDefault();
+        e.stopPropagation();
+    }
 
     let dNum =
         document.getElementById(
@@ -2435,7 +2445,11 @@ function openPreviewModal(){
    CLOSE PREVIEW
 ========================================================= */
 
-function closePreviewModal(){
+function closePreviewModal(e){
+    if(e){
+        e.preventDefault();
+        e.stopPropagation();
+    }
 
     let modal =
         document.getElementById(
@@ -2455,13 +2469,25 @@ function closePreviewModal(){
    PRINT / PREVIEW
 ========================================================= */
 
-function printPreview(){
-    // Capacitor மற்றும் WebView இரண்டிலும் சரியாக பிரிண்ட் அல்லது PDF டயலாக் வர இது உதவும்
+function executePrint(e){
+    if(e){
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
     if (typeof window.handleGlobalPrint === "function") {
         window.handleGlobalPrint();
     } else {
         window.print();
     }
+}
+
+function navigateDashboard(e) {
+    if(e){
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    window.location.href = "dashboard.html"; 
 }
 
 </script>
