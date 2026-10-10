@@ -11,6 +11,7 @@
 
 <script src="config.js"></script>
 <script src="translator.js"></script>
+<script src="printer.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
@@ -474,7 +475,6 @@ th{
         padding-bottom: 2px !important;
     }
 
-    /* Print-ல் வார்ப் மற்றும் வெப்ட் தலைப்புகள் தெளிவாகத் தெரியும்படி செய்தல் */
     #warpDesignTitle,
     #weftDesignTitle {
         display: block !important;
@@ -716,9 +716,7 @@ td {
     <div style="font-weight: 700; font-size: 12px; margin-bottom: 4px; display: block;" id="warpDesignTitle">
         * WARP DESIGN *
     </div>
-  <h3 class="section-title">
-                 🧵 வார்ப்  என்ட்ரி 
-</h3>
+
     <div
         id="designHeaderBox"
         class="design-info-box"
@@ -2188,7 +2186,6 @@ function buildTableRowsHtml(rows){
 /* =========================================================
    PRINT / CLOSE ACTIONS
 ========================================================= */
-
 function executePrint(e){
     if(e){
         e.preventDefault();
@@ -2198,13 +2195,9 @@ function executePrint(e){
     if (window._isPrintingInProgress) return;
     window._isPrintingInProgress = true;
 
-    try {
-        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Print) {
-            window.Capacitor.Plugins.Print.print();
-        } else {
-            window.print();
-        }
-    } catch (err) {
+    if (typeof window.appPrint === "function") {
+        window.appPrint();
+    } else {
         window.print();
     }
 
@@ -2212,6 +2205,7 @@ function executePrint(e){
         window._isPrintingInProgress = false;
     }, 1000);
 }
+
 
 function navigateDashboard(e) {
     if(e){
