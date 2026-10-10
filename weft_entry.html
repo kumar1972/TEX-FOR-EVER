@@ -4,34 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Weft Entry - TEX FOR EVER</title>
-
     <script src="config.js"></script>
     <script src="translator.js"></script>
-
+  <script src="printer.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-
-        * {
+      * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             font-family: 'Poppins', sans-serif;
         }
-
         html, body {
             width: 100%;
             min-height: 100vh;
             background: #030712;
             color: #1E2B23;
         }
-
         body {
             padding: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-
         .container {
             width: 100%;
             max-width: 900px;
@@ -45,14 +40,12 @@
             flex-direction: column;
             gap: 15px;
         }
-
         .top-nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 5px;
         }
-
         .back-btn {
             display: inline-flex;
             align-items: center;
@@ -67,12 +60,10 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
             transition: all 0.3s ease;
         }
-
         .back-btn:hover {
             background: #000000;
             transform: translateY(-2px);
         }
-
         .completed-checkbox {
             display: flex;
             align-items: center;
@@ -83,7 +74,6 @@
             border: 1px solid rgba(82, 110, 81, 0.4);
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-
         .completed-checkbox input[type="checkbox"] {
             width: 16px;
             height: 16px;
@@ -91,15 +81,13 @@
             accent-color: #526E51;
             margin: 0;
         }
-
         .completed-checkbox label {
-            margin: 0;
+           margin: 0;
             color: #3F5A3E;
             cursor: pointer;
             font-size: 12px;
             font-weight: 700;
         }
-
         .page-title {
             font-size: 16px;
             font-weight: 700;
@@ -109,7 +97,6 @@
             padding-left: 12px;
             margin-bottom: 5px;
         }
-
         .page-title::before {
             content: '';
             position: absolute;
@@ -120,7 +107,6 @@
             background: #4A7C59;
             border-radius: 4px;
         }
-
         .form-section {
             background: #F8FAF8;
             border: 1px solid #E2E8E2;
@@ -129,7 +115,6 @@
             margin-bottom: 5px;
             position: relative;
         }
-
         .section-badge {
             position: absolute;
             top: -12px;
@@ -144,17 +129,14 @@
             text-transform: uppercase;
             box-shadow: 0 4px 8px rgba(74, 124, 89, 0.25);
         }
-
         .section-badge.blue {
             background: linear-gradient(135deg, #3BF6, #1D4ED8);
             box-shadow: 0 4px 8px rgba(59, 130, 246, 0.25);
         }
-
         .section-badge.amber {
             background: linear-gradient(135deg, #F50B, #D97706);
             box-shadow: 0 4px 8px rgba(217, 119, 6, 0.25);
         }
-
         .compact-top-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
@@ -165,14 +147,12 @@
             border: 1px dashed #D1DED1;
             margin-top: 5px;
         }
-
         .form-group {
             display: flex;
             flex-direction: column;
             gap: 4px;
         }
-
-        .form-group label {
+       .form-group label {
             font-size: 10px;
             font-weight: 600;
             color: #4A554A;
@@ -4322,15 +4302,11 @@ function previewWeftPattern() {
 /* ============================================================
    AUTHORIZATION
 ============================================================ */
-
 function authorizationAlert() {
-
-    alert(
+   alert(
         "Access Denied! You do not have permission to access this page. ❌"
     );
 }
-
 </script>
-
 </body>
 </html>
