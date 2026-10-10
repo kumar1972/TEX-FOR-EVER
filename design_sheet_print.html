@@ -11,7 +11,6 @@
 
 <script src="config.js"></script>
 <script src="translator.js"></script>
-<script src="printer.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
@@ -94,7 +93,6 @@ body{
     font-weight:700;
 }
 
-.preview-btn,
 .print-btn{
     border:0;
     color:white;
@@ -103,13 +101,6 @@ body{
     font-size:11px;
     font-weight:700;
     cursor:pointer;
-}
-
-.preview-btn{
-    background:linear-gradient(135deg,#3B82F6,#1D4ED8);
-}
-
-.print-btn{
     background:linear-gradient(135deg,#10B981,#059669);
 }
 
@@ -369,64 +360,6 @@ th{
 }
 
 /* =========================================================
-   PREVIEW MODAL
-========================================================= */
-
-.overlay-modal{
-    display:none;
-    position:fixed;
-    inset:0;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,.75);
-    z-index:99999;
-    flex-direction:column;
-}
-
-.overlay-modal.show{
-    display:flex;
-}
-
-.modal-content{
-    background:#ffffff;
-    width:100%;
-    height:100%;
-    display:flex;
-    flex-direction:column;
-    overflow:hidden;
-}
-
-.modal-header{
-    padding:10px 12px;
-    background:#F4F7F4;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    border-bottom:1px solid #E2E8E2;
-    flex-shrink:0;
-}
-
-.modal-header h3{
-    font-size:13px;
-    color:#2F4F38;
-}
-
-.modal-actions{
-    display:flex;
-    gap:5px;
-}
-
-.modal-body{
-    padding:10px;
-    overflow-y:auto;
-    flex:1;
-    background:#ffffff !important;
-    width:100%;
-    max-width:1000px;
-    margin:0 auto;
-}
-
-/* =========================================================
    MOBILE
 ========================================================= */
 
@@ -445,11 +378,6 @@ th{
 
     .header-bar h3{
         font-size:11px;
-    }
-
-    .preview-btn{
-        font-size:10px;
-        padding:6px 10px;
     }
 
     .design-info-box,
@@ -490,14 +418,14 @@ th{
 }
 
 /* =========================================================
-   PRINT
+   PRINT CONFIGURATION
 ========================================================= */
 
 @media print{
 
     @page{
         size:A4 portrait;
-        margin:6mm;
+        margin:5mm;
     }
 
     html,
@@ -519,40 +447,21 @@ th{
         visibility:hidden !important;
     }
 
-    #previewModal,
-    #previewModal *{
+    .main-card,
+    .main-card *{
         visibility:visible !important;
     }
 
-    #previewModal{
-        display:block !important;
+    .main-card{
         position:absolute !important;
         inset:0 !important;
         width:100% !important;
         height:auto !important;
         background:#ffffff !important;
-        z-index:999999 !important;
-    }
-
-    .modal-content{
-        width:100% !important;
-        height:auto !important;
-        display:block !important;
-        background:#ffffff !important;
-    }
-
-    .modal-header{
-        display:none !important;
-    }
-
-    .modal-body{
-        width:100% !important;
-        max-width:none !important;
-        height:auto !important;
-        overflow:visible !important;
+        border:none !important;
+        box-shadow:none !important;
         padding:0 !important;
         margin:0 !important;
-        background:#ffffff !important;
     }
 
     .hide-on-print, .no-print{
@@ -564,6 +473,17 @@ th{
         margin-bottom: 2px !important;
         padding-bottom: 2px !important;
     }
+
+    /* Print-ல் வார்ப் மற்றும் வெப்ட் தலைப்புகள் தெளிவாகத் தெரியும்படி செய்தல் */
+    #warpDesignTitle,
+    #weftDesignTitle {
+        display: block !important;
+        visibility: visible !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        color: #000000 !important;
+        margin-bottom: 3px !important;
+    }
     
     .design-info-box, .weft-info-box{
         margin-bottom: 4px !important;
@@ -571,6 +491,8 @@ th{
         background:#ffffff !important;
         border:1px solid #000000 !important;
         color:#000000 !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
 
     .design-info-box div span, .weft-info-box div span{
@@ -578,8 +500,10 @@ th{
     }
     
     .section-title{
-        margin-top: 2px !important;
-        margin-bottom: 2px !important;
+        margin-top: 4px !important;
+        margin-bottom: 4px !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
     
     .dual-table-wrapper{
@@ -588,7 +512,8 @@ th{
         clear:both !important;
         overflow:hidden !important;
         page-break-inside:avoid !important; 
-        margin-bottom: 10px !important;
+        break-inside: avoid !important;
+        margin-bottom: 6px !important;
     }
     
     .single-table-col{
@@ -606,7 +531,7 @@ th{
         width:100% !important;
         border-collapse:collapse !important;
         background:#ffffff !important;
-        font-size:11px !important; 
+        font-size:10px !important; 
     }
 
     th,
@@ -614,9 +539,9 @@ th{
         border:none !important;
         background:#ffffff !important;
         color:#000000 !important;
-        padding:3px 2px !important; 
-        font-size:11px !important; 
-        line-height: 1.2 !important;
+        padding:2px 2px !important; 
+        font-size:10px !important; 
+        line-height: 1.1 !important;
     }
 
     .col-set {
@@ -626,7 +551,7 @@ th{
     th{
         background:#EAF0EA !important;
         color:#000000 !important;
-        font-size:10px !important;
+        font-size:9px !important;
         border-top:2px solid #4A7C59 !important;
         border-bottom:2px solid #4A7C59 !important;
         -webkit-print-color-adjust:exact !important;
@@ -649,9 +574,11 @@ th{
     .summary-box{
         background:#F4F7F4 !important;
         color:#000000 !important;
-        font-size:10px !important;
-        padding:4px 6px !important;
+        font-size:9px !important;
+        padding:3px 5px !important;
         border:1px dashed #888 !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
         -webkit-print-color-adjust:exact !important;
         print-color-adjust:exact !important;
     }
@@ -664,48 +591,49 @@ th{
         print-color-adjust:exact !important;
     }
 
-    .page-break{
-        page-break-before:always;
-        break-before:page;
+    #weftSection {
+        page-break-before: always !important;
+        break-before: page !important;
     }
 }
-      /* PRINT FONT SIZE — ONLY */
-    .company-header h1 {
-        font-size: 20px !important;
-    }
 
-    .company-header p {
-        font-size: 12px !important;
-    }
+/* PRINT FONT SIZE — ONLY */
+.company-header h1 {
+    font-size: 20px !important;
+}
 
-    .design-info-box,
-    .weft-info-box {
-        font-size: 13px !important;
-    }
+.company-header p {
+    font-size: 12px !important;
+}
 
-    .section-title {
-        font-size: 13px !important;
-    }
+.design-info-box,
+.weft-info-box {
+    font-size: 13px !important;
+}
 
-    table {
-        font-size: 13px !important;
-    }
+.section-title {
+    font-size: 13px !important;
+}
 
-    th {
-        font-size: 12px !important;
-    }
+table {
+    font-size: 13px !important;
+}
 
-    td {
-        font-size: 13px !important;
-    }
+th {
+    font-size: 12px !important;
+}
 
-    .summary-box {
-        font-size: 12px !important;
-    }
+td {
+    font-size: 13px !important;
+}
 
-    .summary-box * {
-        font-size: inherit !important;
-    }
+.summary-box {
+    font-size: 12px !important;
+}
+
+.summary-box * {
+    font-size: inherit !important;
+}
 </style>
 </head>
 
@@ -723,16 +651,25 @@ th{
         </button>
     </div>
 
-    <div class="header-bar hide-on-print">
+    <div class="header-bar">
 
         <h3>📋 டிசைன் ஷீட் பிரிண்ட்</h3>
 
-        <button
-            type="button"
-            class="preview-btn"
-            onclick="openPreviewModal(event)">
-            👁️ Preview
-        </button>
+        <div style="display: flex; gap: 5px;" class="hide-on-print">
+            <button
+                type="button"
+                class="print-btn"
+                onclick="executePrint(event)">
+                🖨️ Print
+            </button>
+
+            <button
+                type="button"
+                class="close-btn"
+                onclick="navigateDashboard(event)">
+                Close ✕
+            </button>
+        </div>
 
     </div>
 
@@ -776,6 +713,12 @@ th{
          WARP HEADER
     ====================================================== -->
 
+    <div style="font-weight: 700; font-size: 12px; margin-bottom: 4px; display: block;" id="warpDesignTitle">
+        * WARP DESIGN *
+    </div>
+  <h3 class="section-title">
+                 🧵 வார்ப்  என்ட்ரி 
+</h3>
     <div
         id="designHeaderBox"
         class="design-info-box"
@@ -875,6 +818,10 @@ th{
 
     <div id="weftSection">
 
+        <div style="font-weight: 700; font-size: 12px; margin-top: 10px; margin-bottom: 4px; display: block;" id="weftDesignTitle">
+            * WEFT DESIGN *
+        </div>
+
         <h3 class="section-title">
                  🧶 வெப்ட்  என்ட்ரி 
         </h3>
@@ -949,50 +896,6 @@ th{
             id="weftSummaryBox"
             class="summary-box"
             style="display:none;">
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- =========================================================
-     PREVIEW MODAL
-========================================================= -->
-
-<div id="previewModal" class="overlay-modal">
-
-    <div class="modal-content">
-
-        <div class="modal-header hide-on-print">
-
-            <h3>
-                👁️ Design Sheet Print Preview
-            </h3>
-
-            <div class="modal-actions">
-
-                <button
-                    type="button"
-                    class="print-btn"
-                    onclick="executePrint(event)">
-                    🖨️ Print
-                </button>
-
-                <button
-                    type="button"
-                    class="close-btn"
-                    onclick="closePreviewModal(event)">
-                    Close ✕
-                </button>
-
-            </div>
-
-        </div>
-
-        <div
-            class="modal-body"
-            id="previewContent">
         </div>
 
     </div>
@@ -2283,190 +2186,7 @@ function buildTableRowsHtml(rows){
 
 
 /* =========================================================
-   OPEN PREVIEW
-========================================================= */
-
-function openPreviewModal(e){
-    if(e){
-        e.preventDefault();
-        e.stopPropagation();
-    }
-
-    let dNum =
-        document.getElementById(
-            "designNumber"
-        ).value;
-
-
-    if(!dNum){
-
-        alert(
-            "முதலில் டிசைன் எண்ணைத் தேர்ந்தெடுக்கவும்!"
-        );
-
-        return;
-
-    }
-
-
-    let compName =
-        document.getElementById(
-            "printCompName"
-        ).innerText;
-
-
-    let compAddr =
-        document.getElementById(
-            "printCompAddr"
-        ).innerHTML;
-
-
-    let headerBox =
-        document.getElementById(
-            "designHeaderBox"
-        ).outerHTML;
-
-
-    let warpSec =
-        document.getElementById(
-            "warpSection"
-        ).outerHTML;
-
-
-    let weftSec =
-        document.getElementById(
-            "weftSection"
-        ).outerHTML;
-
-
-    /* =====================================================
-       IMPORTANT:
-       NO BLACK BACKGROUND HERE
-    ====================================================== */
-
-    let html = `
-
-        <div
-            style="
-                background:#ffffff;
-                color:#000000;
-                width:100%;
-            "
-        >
-
-            <!-- COMPANY -->
-
-            <div
-                style="
-                    text-align:center;
-                    margin-bottom:8px;
-                    border-bottom:2px solid #4A7C59;
-                    padding-bottom:5px;
-                "
-            >
-
-                <h2
-                    style="
-                        margin:0;
-                        font-size:16px;
-                        color:#2F4F38;
-                    "
-                >
-                    ${compName}
-                </h2>
-
-                <p
-                    style="
-                        margin:2px 0 0;
-                        font-size:9px;
-                        color:#4A554A;
-                    "
-                >
-                    ${compAddr}
-                </p>
-
-            </div>
-            
-            <div> *  WARP DESIGN  *
-            </div>
-            
-             <h3 class="section-title">
-                 🧵 வார்ப்  என்ட்ரி 
-             </h3>
-
-            <!-- DESIGN HEADER -->
-
-            ${headerBox.replace(
-                'style="display:none;"',
-                'style="display:grid;"'
-            )}
-
-            ${warpSec}
-
-
-            <!-- PAGE BREAK -->
-
-            <div class="page-break"></div>
-
-
-         *  WEFT DESIGN  *
-
-            ${weftSec}
-
-        </div>
-
-    `;
-
-
-    document.getElementById(
-        "previewContent"
-    ).innerHTML = html;
-
-
-    let modal =
-        document.getElementById(
-            "previewModal"
-        );
-
-
-    modal.style.display = "flex";
-
-
-    setTimeout(function(){
-
-        modal.classList.add("show");
-
-    },20);
-
-}
-
-
-/* =========================================================
-   CLOSE PREVIEW
-========================================================= */
-
-function closePreviewModal(e){
-    if(e){
-        e.preventDefault();
-        e.stopPropagation();
-    }
-
-    let modal =
-        document.getElementById(
-            "previewModal"
-        );
-
-    modal.classList.remove("show");
-
-    setTimeout(function(){
-
-        modal.style.display = "none";
-
-    },150);
-
-}
-/* =========================================================
-   PRINT / PREVIEW
+   PRINT / CLOSE ACTIONS
 ========================================================= */
 
 function executePrint(e){
@@ -2475,11 +2195,22 @@ function executePrint(e){
         e.stopPropagation();
     }
 
-    if (typeof window.handleGlobalPrint === "function") {
-        window.handleGlobalPrint();
-    } else {
+    if (window._isPrintingInProgress) return;
+    window._isPrintingInProgress = true;
+
+    try {
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Print) {
+            window.Capacitor.Plugins.Print.print();
+        } else {
+            window.print();
+        }
+    } catch (err) {
         window.print();
     }
+
+    setTimeout(() => {
+        window._isPrintingInProgress = false;
+    }, 1000);
 }
 
 function navigateDashboard(e) {
